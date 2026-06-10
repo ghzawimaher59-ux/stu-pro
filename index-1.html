@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة تسجيل مشاريع البرمجة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --bg:          #0C0E14;
+      --surface:     #13161F;
+      --surface2:    #1A1E2B;
+      --border:      rgba(255,255,255,0.07);
+      --blue:        #4F8EF7;
+      --blue-dim:    rgba(79,142,247,0.12);
+      --purple:      #8B5CF6;
+      --green:       #22D3A6;
+      --red:         #F75A5A;
+      --amber:       #F7A84F;
+      --text:        #E8EAF0;
+      --text-muted:  #6B7280;
+      --text-sub:    #9CA3AF;
+      --radius:      14px;
+      --radius-sm:   8px;
+      --shadow:      0 8px 32px rgba(0,0,0,0.45);
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      padding: 64px 24px 48px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      top: -120px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse at center, rgba(79,142,247,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue-dim);
+      border: 1px solid rgba(79,142,247,0.25);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: var(--blue);
+      margin-bottom: 20px;
+      letter-spacing: 0.02em;
+    }
+    .hero-tag span { width:7px; height:7px; background:var(--blue); border-radius:50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 14px;
+    }
+    .hero p {
+      color: var(--text-sub);
+      font-size: 16px;
+      max-width: 500px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .stat-item { text-align: center; }
+    .stat-item .val {
+      font-size: 28px; font-weight: 700;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-item .lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ─── CONTROLS BAR ─── */
+    .controls {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(12,14,20,0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+    }
+    .controls-inner {
+      max-width: 1300px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 1;
+    }
+    .filter-btn {
+      padding: 7px 18px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-sub);
+      font-family: 'Cairo', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .filter-btn:hover { border-color: rgba(79,142,247,0.4); color: var(--text); }
+    .filter-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .filter-btn.active-avail { background: var(--green); border-color: var(--green); color: #fff; }
+    .filter-btn.active-full  { background: var(--red);   border-color: var(--red);   color: #fff; }
+
+    .search-wrap {
+      position: relative;
+    }
+    .search-wrap input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 40px 8px 14px;
+      color: var(--text);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      width: 220px;
+      outline: none;
+      transition: border-color .2s;
+      direction: rtl;
+    }
+    .search-wrap input::placeholder { color: var(--text-muted); }
+    .search-wrap input:focus { border-color: rgba(79,142,247,0.5); }
+    .search-wrap .search-icon {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); font-size: 15px; pointer-events: none;
+    }
+
+    /* ─── LOADING STATE ─── */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+    }
+    .spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-screen p { color: var(--text-muted); font-size: 15px; }
+
+    /* ─── ERROR STATE ─── */
+    .error-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 12px;
+      text-align: center;
+      padding: 24px;
+    }
+    .error-screen .err-icon { font-size: 48px; }
+    .error-screen h3 { font-size: 20px; font-weight: 700; }
+    .error-screen p { color: var(--text-muted); max-width: 400px; line-height: 1.6; }
+    .retry-btn {
+      margin-top: 8px;
+      padding: 10px 28px;
+      background: var(--blue);
+      border: none; border-radius: var(--radius-sm);
+      color: #fff; font-family: 'Cairo', sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: opacity .2s;
+    }
+    .retry-btn:hover { opacity: .85; }
+
+    /* ─── GRID ─── */
+    .grid-section {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+    }
+    .results-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .results-label strong { color: var(--text); }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      cursor: pointer;
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; right: 0;
+      width: 80px; height: 80px;
+      background: radial-gradient(circle at top right, rgba(79,142,247,0.08), transparent 70%);
+      pointer-events: none;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(79,142,247,0.3);
+      box-shadow: 0 12px 40px rgba(79,142,247,0.1);
+    }
+    .card.full {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    .card.full:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .card-id {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blue);
+      background: var(--blue-dim);
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+      letter-spacing: 0.05em;
+    }
+    .card-badge {
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      padding: 3px 8px;
+      white-space: nowrap;
+    }
+    .badge-avail { background: rgba(34,211,166,0.12); color: var(--green); }
+    .badge-full  { background: rgba(247,90,90,0.12);  color: var(--red); }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--text);
+      flex: 1;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ─── PROGRESS BAR ─── */
+    .progress-section { display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .progress-label { font-size: 12px; color: var(--text-muted); }
+    .progress-count { font-size: 12px; font-weight: 700; color: var(--text-sub); }
+    .progress-track {
+      width: 100%;
+      height: 5px;
+      background: var(--surface2);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
+    .fill-low    { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .fill-mid    { background: linear-gradient(90deg, var(--amber), #F7704F); }
+    .fill-high   { background: linear-gradient(90deg, var(--red), #C0392B); }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 80px 24px;
+      gap: 12px;
+    }
+    .empty-state .icon { font-size: 48px; }
+    .empty-state h3 { font-size: 18px; font-weight: 700; }
+    .empty-state p { color: var(--text-muted); }
+
+    /* ─── MODAL OVERLAY ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+      transform: scale(.95) translateY(10px);
+      transition: transform .25s ease;
+      position: relative;
+    }
+    .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+    .modal-header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .modal-header .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .modal-close {
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 18px;
+      transition: all .15s;
+      flex-shrink: 0;
+    }
+    .modal-close:hover { background: rgba(247,90,90,0.15); color: var(--red); border-color: rgba(247,90,90,0.3); }
+    .modal-topic-id {
+      font-size: 11px; font-weight: 700;
+      color: var(--blue);
+      background: var(--blue-dim);
+      padding: 4px 10px; border-radius: 6px;
+      margin-bottom: 8px; display: inline-block;
+    }
+    .modal-title {
+      font-size: 18px; font-weight: 700;
+      line-height: 1.4; color: var(--text);
+    }
+    .modal-desc {
+      margin-top: 10px;
+      font-size: 13px; color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .modal-body { padding: 24px 28px; }
+
+    .form-hint {
+      background: var(--blue-dim);
+      border: 1px solid rgba(79,142,247,0.2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--blue);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .form-label {
+      font-size: 13px; font-weight: 700;
+      color: var(--text-sub);
+      margin-bottom: 14px;
+      display: block;
+    }
+
+    .student-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .student-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .student-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .student-num.req  { background: var(--blue-dim); color: var(--blue); }
+    .student-num.opt  { background: var(--surface2); color: var(--text-muted); }
+    .student-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+      direction: rtl;
+    }
+    .student-input::placeholder { color: var(--text-muted); }
+    .student-input:focus { border-color: rgba(79,142,247,0.5); background: rgba(79,142,247,0.04); }
+    .student-input.error { border-color: var(--red) !important; }
+    .opt-tag {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .modal-footer {
+      padding: 20px 28px 28px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .btn-cancel {
+      padding: 11px 24px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px; font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .btn-cancel:hover { background: var(--surface2); color: var(--text); }
+    .btn-submit {
+      padding: 11px 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      color: #fff;
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-submit:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* ─── FULL MODAL ─── */
+    .full-notice {
+      padding: 32px 28px;
+      text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 12px;
+    }
+    .full-notice .icon { font-size: 48px; }
+    .full-notice h3 { font-size: 18px; font-weight: 700; color: var(--red); }
+    .full-notice p { color: var(--text-muted); font-size: 14px; line-height: 1.6; max-width: 340px; }
+
+    /* ─── SUCCESS MODAL ─── */
+    .success-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .success-overlay.open { opacity: 1; pointer-events: all; }
+    .success-card {
+      background: var(--surface);
+      border: 1px solid rgba(34,211,166,0.25);
+      border-radius: 20px;
+      padding: 40px 36px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(34,211,166,0.12);
+      transform: scale(.9);
+      transition: transform .3s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .success-overlay.open .success-card { transform: scale(1); }
+    .success-icon { font-size: 56px; margin-bottom: 12px; }
+    .success-card h3 { font-size: 22px; font-weight: 900; color: var(--green); margin-bottom: 8px; }
+    .success-card p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+    .success-id {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 8px 20px;
+      background: rgba(34,211,166,0.1);
+      border: 1px solid rgba(34,211,166,0.25);
+      border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.06em;
+    }
+    .btn-done {
+      margin-top: 24px;
+      padding: 12px 40px;
+      background: var(--green);
+      border: none; border-radius: var(--radius-sm);
+      color: #0C0E14;
+      font-family: 'Cairo', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-done:hover { opacity: .85; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed;
+      bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 20px;
+      font-size: 14px; font-weight: 600;
+      z-index: 400;
+      opacity: 0;
+      transition: opacity .3s, transform .3s;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.err { border-color: rgba(247,90,90,0.4); color: var(--red); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .projects-grid { grid-template-columns: 1fr; }
+      .stats-bar { gap: 24px; }
+      .modal { border-radius: 16px 16px 0 0; max-height: 85vh; }
+      .modal-overlay { align-items: flex-end; padding: 0; }
+      .search-wrap input { width: 160px; }
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+    /* ─── CONFIG BANNER ─── */
+    .config-banner {
+      background: rgba(247,168,79,0.1);
+      border: 1px solid rgba(247,168,79,0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--amber);
+      text-align: center;
+      margin: 0 24px;
+      display: none;
+    }
+    .config-banner.visible { display: block; }
+    .config-banner a { color: var(--amber); }
+  </style>
+</head>
+
+<body>
+
+  <!-- ─── HERO ─── -->
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-tag"><span></span>نظام مفتوح للتسجيل</div>
+    <h1>اختر مشروعك</h1>
+    <p>تصفّح المشاريع المتاحة، شكّل فريقك من 2 إلى 5 طلاب، وسجّل اختيارك بنقرة واحدة.</p>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="val" id="stat-total">—</div><div class="lbl">موضوع</div></div>
+      <div class="stat-item"><div class="val" id="stat-avail">—</div><div class="lbl">متاح للتسجيل</div></div>
+      <div class="stat-item"><div class="val" id="stat-teams">—</div><div class="lbl">فريق مسجّل</div></div>
+    </div>
+  </header>
+
+  <!-- ─── CONFIG BANNER ─── -->
+  <div class="config-banner" id="configBanner">
+    ⚙️ يجب تهيئة الرابط — افتح ملف <code>index.html</code> وأدخل معرّف جداول البيانات في أعلى سكريبت JS
+  </div>
+
+  <!-- ─── CONTROLS ─── -->
+  <div class="controls">
+    <div class="controls-inner">
+      <div class="filter-group">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">الكل</button>
+        <button class="filter-btn" data-filter="available" onclick="setFilter('available',this)">متاح ✓</button>
+        <button class="filter-btn" data-filter="full" onclick="setFilter('full',this)">مكتمل ✗</button>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="ابحث عن موضوع..." oninput="filterCards()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MAIN CONTENT ─── -->
+  <main class="grid-section">
+    <!-- Loading -->
+    <div class="loading-screen" id="loadingScreen">
+      <div class="spinner"></div>
+      <p>جارٍ تحميل المشاريع…</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-screen" id="errorScreen">
+      <div class="err-icon">⚠️</div>
+      <h3>تعذّر تحميل البيانات</h3>
+      <p id="errorMsg">حدث خطأ في الاتصال بجداول البيانات. تأكد من إعداد الرابط وأن الجدول منشور بشكل صحيح.</p>
+      <button class="retry-btn" onclick="loadData()">إعادة المحاولة</button>
+    </div>
+
+    <!-- Results label -->
+    <div class="results-label" id="resultsLabel" style="display:none"></div>
+
+    <!-- Grid -->
+    <div class="projects-grid" id="projectsGrid"></div>
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="icon">🔍</div>
+      <h3>لا توجد نتائج</h3>
+      <p>جرّب تعديل كلمة البحث أو تغيير الفلتر.</p>
+    </div>
+  </main>
+
+  <!-- ─── REGISTRATION MODAL ─── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="top-row">
+          <div>
+            <div class="modal-topic-id" id="modalId"></div>
+            <div class="modal-title" id="modalTitle"></div>
+          </div>
+          <button class="modal-close" onclick="closeModalDirect()">✕</button>
+        </div>
+        <p class="modal-desc" id="modalDesc"></p>
+      </div>
+
+      <!-- Regular registration form -->
+      <div id="regForm">
+        <div class="modal-body">
+          <div class="form-hint">
+            📋 أدخل أسماء أعضاء الفريق — يجب أن يكون العدد بين <strong>2</strong> و <strong>5</strong> طلاب.
+          </div>
+          <label class="form-label">أسماء أعضاء الفريق</label>
+          <div class="student-fields" id="studentFields">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModalDirect()">إلغاء</button>
+          <button class="btn-submit" id="submitBtn" onclick="submitRegistration()">
+            <span>تأكيد التسجيل</span> →
+          </button>
+        </div>
+      </div>
+
+      <!-- Full notice -->
+      <div id="fullNotice" class="full-notice" style="display:none">
+        <div class="icon">🔒</div>
+        <h3>المشروع مكتمل</h3>
+        <p>وصل هذا المشروع إلى الحد الأقصى من الفرق المسجّلة (6 فرق). يرجى اختيار موضوع آخر.</p>
+        <button class="btn-cancel" onclick="closeModalDirect()" style="margin-top:8px">العودة للقائمة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── SUCCESS OVERLAY ─── -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon">🎉</div>
+      <h3>تم التسجيل بنجاح!</h3>
+      <p>تم تسجيل فريقك في المشروع. احتفظ بالرمز التعريفي لفريقك.</p>
+      <div class="success-id" id="successTeamId"></div>
+      <br/>
+      <button class="btn-done" onclick="closeSucess()">رائع، شكراً!</button>
+    </div>
+  </div>
+
+  <!-- ─── TOAST ─── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ─── SCRIPT ─── -->
+  <script>
+  /* ═══════════════════════════════════════════════════════════════
+     ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗
+    ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝
+    ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗
+    ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║
+    ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝
+     ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝
+  ════════════════════════════════════════════════════════════════
+
+  ► قبل نشر الموقع، غيّر SPREADSHEET_ID أدناه بمعرّف جدولك
+  ► اتبع تعليمات الإعداد في نهاية هذا الملف
+  ═══════════════════════════════════════════════════════════════ */
+
+  const CONFIG = {
+    SPREADSHEET_ID:  '15zOV3fJaSyruWcGRo0WKy-h6HivjBR689CdvdZPWCfI',   // ← غيّر هذا
+    SHEET_TOPICS:    'Topics',                      // اسم ورقة المواضيع
+    SHEET_TEAMS:     'Teams',                       // اسم ورقة الفرق
+    MAX_TEAMS:       6,                             // الحد الأقصى لعدد الفرق
+    MIN_MEMBERS:     2,                             // الحد الأدنى لعدد الأعضاء
+    MAX_MEMBERS:     5,                             // الحد الأقصى لعدد الأعضاء
+    APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbygnfxvViWyJU6GkV7K-t469CC9RJYI77-ZUjtLghp66JATmxF2LSDFI9nA4TO_woJh/exec', // ← غيّر هذا (لإضافة بيانات)
+  };
+
+  /* ─── STATE ─── */
+  let allTopics   = [];
+  let teamsData   = {};   // { topicId: count }
+  let currentFilter = 'all';
+  let activeTopicId = null;
+
+  /* ═══ FETCH DATA ══════════════════════════════════════════════ */
+  async function loadData() {
+    showScreen('loading');
+
+    if (CONFIG.SPREADSHEET_ID === 'YOUR_SPREADSHEET_ID_HERE') {
+      document.getElementById('configBanner').classList.add('visible');
+      showScreen('error');
+      setError('لم يتم تهيئة معرّف جداول البيانات. راجع التعليمات في أسفل الصفحة.');
+      return;
+    }
+
+    try {
+      const [topics, teams] = await Promise.all([
+        fetchSheet(CONFIG.SHEET_TOPICS),
+        fetchSheet(CONFIG.SHEET_TEAMS),
+      ]);
+      processData(topics, teams);
+      showScreen('grid');
+    } catch (e) {
+      showScreen('error');
+      setError('تعذّر الاتصال بجداول البيانات: ' + e.message);
+    }
+  }
+
+  function fetchSheet(sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    return fetch(url)
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(text => {
+        // Google wraps response in /*O_o*/ ... 
+        const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+        return json;
+      });
+  }
+
+  function processData(topicsJson, teamsJson) {
+    // ── Parse Topics ──
+    // Expected columns: A=ID, B=Title, C=Description
+    const tRows = topicsJson.table.rows;
+    allTopics = tRows
+      .filter(r => r.c && r.c[0] && r.c[0].v !== null)
+      .map(r => ({
+        id:   String(r.c[0].v).trim(),
+        title: r.c[1] ? String(r.c[1].v || '') : '',
+        desc:  r.c[2] ? String(r.c[2].v || '') : '',
+      }));
+
+    // ── Parse Teams ──
+    // Expected columns: A=TeamUID, B=TopicID, C-G=Student1-5
+    teamsData = {};
+    const tTeams = teamsJson.table.rows;
+    tTeams
+      .filter(r => r.c && r.c[1] && r.c[1].v !== null)
+      .forEach(r => {
+        const tid = String(r.c[1].v).trim();
+        teamsData[tid] = (teamsData[tid] || 0) + 1;
+      });
+
+    // ── Update stats ──
+    const totalTeams = Object.values(teamsData).reduce((a, b) => a + b, 0);
+    const availCount = allTopics.filter(t => (teamsData[t.id] || 0) < CONFIG.MAX_TEAMS).length;
+    animateCount('stat-total', allTopics.length);
+    animateCount('stat-avail', availCount);
+    animateCount('stat-teams', totalTeams);
+
+    renderGrid(allTopics);
+  }
+
+  /* ═══ RENDER ═════════════════════════════════════════════════ */
+  function renderGrid(topics) {
+    const grid = document.getElementById('projectsGrid');
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+    let filtered = topics;
+    if (currentFilter === 'available') filtered = filtered.filter(t => (teamsData[t.id]||0) < CONFIG.MAX_TEAMS);
+    if (currentFilter === 'full')      filtered = filtered.filter(t => (teamsData[t.id]||0) >= CONFIG.MAX_TEAMS);
+    if (search) filtered = filtered.filter(t =>
+      t.title.toLowerCase().includes(search) ||
+      t.desc.toLowerCase().includes(search) ||
+      t.id.includes(search)
+    );
+
+    document.getElementById('resultsLabel').style.display = filtered.length ? 'block' : 'none';
+    document.getElementById('resultsLabel').innerHTML =
+      `عرض <strong>${filtered.length}</strong> موضوع من أصل <strong>${topics.length}</strong>`;
+
+    if (!filtered.length) {
+      grid.innerHTML = '';
+      document.getElementById('emptyState').style.display = 'flex';
+      return;
+    }
+    document.getElementById('emptyState').style.display = 'none';
+
+    grid.innerHTML = filtered.map(t => buildCard(t)).join('');
+
+    // Animate progress bars
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.progress-fill').forEach(el => {
+        el.style.width = el.dataset.target + '%';
+      });
+    });
+  }
+
+  function buildCard(t) {
+    const count  = teamsData[t.id] || 0;
+    const isFull = count >= CONFIG.MAX_TEAMS;
+    const pct    = Math.round((count / CONFIG.MAX_TEAMS) * 100);
+    const fillClass = pct === 100 ? 'fill-high' : pct >= 50 ? 'fill-mid' : 'fill-low';
+
+    return `
+      <div class="card ${isFull ? 'full' : ''}" onclick="openCard('${escHtml(t.id)}')">
+        <div class="card-header">
+          <div class="card-id">ID: ${escHtml(t.id)}</div>
+          <div class="card-badge ${isFull ? 'badge-full' : 'badge-avail'}">
+            ${isFull ? '🔒 مكتمل' : '✅ متاح'}
+          </div>
+        </div>
+        <div class="card-title">${escHtml(t.title)}</div>
+        <div class="card-desc">${escHtml(t.desc)}</div>
+        <div class="progress-section">
+          <div class="progress-meta">
+            <span class="progress-label">الفرق المسجّلة</span>
+            <span class="progress-count">${count} / ${CONFIG.MAX_TEAMS}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill ${fillClass}" style="width:0%" data-target="${pct}"></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  /* ═══ FILTER / SEARCH ════════════════════════════════════════ */
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.remove('active','active-avail','active-full');
+    });
+    if (f === 'all')       btn.classList.add('active');
+    if (f === 'available') btn.classList.add('active-avail');
+    if (f === 'full')      btn.classList.add('active-full');
+    filterCards();
+  }
+
+  function filterCards() { renderGrid(allTopics); }
+
+  /* ═══ MODAL ══════════════════════════════════════════════════ */
+  function openCard(topicId) {
+    const t = allTopics.find(x => x.id === topicId);
+    if (!t) return;
+
+    activeTopicId = topicId;
+    const count  = teamsData[topicId] || 0;
+    const isFull = count >= CONFIG.MAX_TEAMS;
+
+    document.getElementById('modalId').textContent    = 'موضوع رقم: ' + t.id;
+    document.getElementById('modalTitle').textContent = t.title;
+    document.getElementById('modalDesc').textContent  = t.desc;
+
+    if (isFull) {
+      document.getElementById('regForm').style.display    = 'none';
+      document.getElementById('fullNotice').style.display = 'flex';
+    } else {
+      document.getElementById('regForm').style.display    = 'block';
+      document.getElementById('fullNotice').style.display = 'none';
+      buildStudentFields();
+    }
+
+    document.getElementById('modalOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function buildStudentFields() {
+    const c = CONFIG.MAX_MEMBERS;
+    let html = '';
+    for (let i = 1; i <= c; i++) {
+      const req = i <= CONFIG.MIN_MEMBERS;
+      html += `
+        <div class="student-row">
+          <div class="student-num ${req ? 'req' : 'opt'}">${i}</div>
+          <input
+            type="text"
+            class="student-input"
+            id="student${i}"
+            placeholder="${req ? 'الاسم الكامل (إلزامي)' : 'الاسم الكامل (اختياري)'}"
+            autocomplete="off"
+          />
+          ${!req ? '<span class="opt-tag">اختياري</span>' : ''}
+        </div>`;
+    }
+    document.getElementById('studentFields').innerHTML = html;
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    activeTopicId = null;
+  }
+
+  /* ═══ SUBMIT ═════════════════════════════════════════════════ */
+  async function submitRegistration() {
+    // Collect names
+    const names = [];
+    for (let i = 1; i <= CONFIG.MAX_MEMBERS; i++) {
+      const v = document.getElementById('student' + i)?.value.trim();
+      if (v) names.push(v);
+    }
+
+    // Validate
+    let valid = true;
+    for (let i = 1; i <= CONFIG.MIN_MEMBERS; i++) {
+      const el = document.getElementById('student' + i);
+      if (!el.value.trim()) {
+        el.classList.add('error');
+        valid = false;
+      } else {
+        el.classList.remove('error');
+      }
+    }
+    if (!valid) { showToast('يجب إدخال اسم طالبين على الأقل', true); return; }
+    if (names.length < CONFIG.MIN_MEMBERS) { showToast('الحد الأدنى لأعضاء الفريق هو ' + CONFIG.MIN_MEMBERS, true); return; }
+
+    // Double-check availability
+    const currentCount = teamsData[activeTopicId] || 0;
+    if (currentCount >= CONFIG.MAX_TEAMS) {
+      showToast('المشروع أصبح مكتملاً، اختر موضوعاً آخر', true);
+      closeModalDirect();
+      return;
+    }
+
+    // Generate team ID
+    const teamUID = 'T-' + activeTopicId + '-' + Date.now().toString(36).toUpperCase();
+
+    // Send to Apps Script
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span>جارٍ التسجيل…</span>';
+
+    try {
+      const payload = {
+        action:   'addTeam',
+        teamUID:  teamUID,
+        topicId:  activeTopicId,
+        students: names,
+      };
+
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        // Update local state
+        teamsData[activeTopicId] = (teamsData[activeTopicId] || 0) + 1;
+        closeModalDirect();
+        showSuccess(teamUID);
+        renderGrid(allTopics);
+        updateStats();
+      } else {
+        throw new Error(data.message || 'خطأ غير معروف');
+      }
+    } catch (e) {
+      showToast('خطأ في الحفظ: ' + e.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<span>تأكيد التسجيل</span> →';
+    }
+  }
+
+  /* ═══ SUCCESS ════════════════════════════════════════════════ */
+  function showSuccess(teamUID) {
+    document.getElementById('successTeamId').textContent = 'رمز فريقك: ' + teamUID;
+    document.getElementById('successOverlay').classList.add('open');
+  }
+  function closeSucess() {
+    document.getElementById('successOverlay').classList.remove('open');
+  }
+
+  /* ═══ HELPERS ════════════════════════════════════════════════ */
+  function showScreen(s) {
+    document.getElementById('loadingScreen').style.display  = s === 'loading' ? 'flex' : 'none';
+    document.getElementById('errorScreen').style.display   = s === 'error'   ? 'flex' : 'none';
+    document.getElementById('projectsGrid').style.display  = s === 'grid'    ? 'grid' : 'none';
+    document.getElementById('resultsLabel').style.display  = s === 'grid'    ? 'block': 'none';
+    if (s !== 'grid') document.getElementById('emptyState').style.display = 'none';
+  }
+
+  function setError(msg) {
+    document.getElementById('errorMsg').textContent = msg;
+  }
+
+  function updateStats() {
+    const total = allTopics.length;
+    const avail = allTopics.filter(t => (teamsData[t.id]||0) < CONFIG.MAX_TEAMS).length;
+    const teams = Object.values(teamsData).reduce((a, b) => a + b, 0);
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-avail').textContent = avail;
+    document.getElementById('stat-teams').textContent = teams;
+  }
+
+  function animateCount(id, target) {
+    const el = document.getElementById(id);
+    let cur = 0;
+    const step = Math.ceil(target / 40);
+    const t = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = cur;
+      if (cur >= target) clearInterval(t);
+    }, 25);
+  }
+
+  let toastTimer;
+  function showToast(msg, isErr = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isErr ? ' err' : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  /* ─── Keyboard close ─── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModalDirect();
+  });
+
+  /* ─── Boot ─── */
+  loadData();
+  </script>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║          تعليمات الإعداد — اقرأها بعناية                    ║
+  ╠══════════════════════════════════════════════════════════════╣
+  ║                                                              ║
+  ║  1. ورقة "Topics" — الأعمدة:                                ║
+  ║     A: ID الموضوع (مثال: T001)                              ║
+  ║     B: عنوان الموضوع                                        ║
+  ║     C: الشرح/الوصف                                         ║
+  ║                                                              ║
+  ║  2. ورقة "Teams" — الأعمدة:                                 ║
+  ║     A: TeamUID (معرّف الفريق الفريد - تعبّئها Apps Script)  ║
+  ║     B: TopicID (ID الموضوع المختار)                         ║
+  ║     C–G: Student1 – Student5 (أسماء الطلاب)               ║
+  ║                                                              ║
+  ║  3. ابحث عن SPREADSHEET_ID في رابط الجدول:                  ║
+  ║     https://docs.google.com/spreadsheets/d/XXXX/edit        ║
+  ║     الـ XXXX هو المعرّف                                     ║
+  ║                                                              ║
+  ║  4. انشر الجدول للعموم (Share → Anyone with link → Viewer) ║
+  ║                                                              ║
+  ║  5. أنشئ Apps Script لكتابة البيانات وانشره كـ Web App     ║
+  ║     (التعليمات الكاملة في رسالة المساعد)                   ║
+  ╚══════════════════════════════════════════════════════════════╝
+  -->
+</body>
+</html>
