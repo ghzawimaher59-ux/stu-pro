@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة مشاريع الطلاب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0A0B10;
+      --surface:    #111318;
+      --surface2:   #181B23;
+      --surface3:   #1F2330;
+      --border:     rgba(255,255,255,0.06);
+      --border2:    rgba(255,255,255,0.11);
+      --teal:       #2DD4BF;
+      --teal-dim:   rgba(45,212,191,0.1);
+      --indigo:     #6366F1;
+      --amber:      #FBBF24;
+      --amber-dim:  rgba(251,191,36,0.12);
+      --red:        #F87171;
+      --green:      #34D399;
+      --green-dim:  rgba(52,211,153,0.12);
+      --text:       #E2E8F0;
+      --text-sub:   #94A3B8;
+      --text-muted: #4B5563;
+      --radius:     16px;
+      --radius-sm:  10px;
+      --radius-xs:  6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── AMBIENT ── */
+    .ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .ambient-orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.07; }
+    .orb1 { width:700px; height:700px; background:var(--teal);   top:-200px; right:-150px; }
+    .orb2 { width:500px; height:500px; background:var(--indigo); bottom:-100px; left:-100px; }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: relative; z-index: 10;
+      padding: 0 32px; height: 68px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,11,16,0.85);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--teal), var(--indigo));
+      border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .logo-text { font-size: 15px; font-weight: 700; }
+    .fab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 22px;
+      background: linear-gradient(135deg, var(--teal), #14B8A6);
+      border: none; border-radius: 100px;
+      color: #0A0B10; font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 4px 24px rgba(45,212,191,0.35);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .fab:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(45,212,191,0.45); }
+
+    /* ── HERO ── */
+    .hero { position: relative; z-index: 1; padding: 64px 32px 48px; text-align: center; max-width: 680px; margin: 0 auto; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--teal); margin-bottom: 18px;
+    }
+    .hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 28px; height: 1px; background: var(--teal); opacity: .5; }
+    .hero h1 { font-size: clamp(28px,5vw,50px); font-weight: 900; line-height: 1.12; letter-spacing: -.02em; margin-bottom: 14px; }
+    .hero h1 em { font-style: normal; background: linear-gradient(90deg,var(--teal),var(--indigo)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero p { color: var(--text-sub); font-size: 15px; line-height: 1.75; margin-bottom: 32px; }
+    .counter-row { display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; }
+    .counter-item { text-align: center; }
+    .counter-val { font-size: 30px; font-weight: 900; background: linear-gradient(135deg,var(--teal),var(--indigo)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .counter-lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── CONTROLS ── */
+    .controls-bar {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(10,11,16,0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border); padding: 12px 32px;
+    }
+    .controls-inner { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .search-box { flex: 1; min-width: 180px; position: relative; }
+    .search-box input {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); padding: 9px 40px 9px 14px;
+      color: var(--text); font-family: 'Cairo', sans-serif; font-size: 14px;
+      direction: rtl; outline: none; transition: border-color .2s;
+    }
+    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box input:focus { border-color: rgba(45,212,191,0.4); }
+    .search-box .ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px; pointer-events: none; }
+    .sort-select {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); padding: 9px 13px;
+      color: var(--text); font-family: 'Cairo', sans-serif; font-size: 13px;
+      outline: none; cursor: pointer; direction: rtl;
+    }
+    .sort-select option { background: var(--surface2); }
+
+    /* filter pills */
+    .filter-pills { display: flex; gap: 7px; flex-wrap: wrap; }
+    .pill {
+      padding: 6px 14px; border-radius: 100px;
+      border: 1px solid var(--border2); background: transparent;
+      color: var(--text-muted); font-family: 'Cairo', sans-serif;
+      font-size: 12px; font-weight: 700; cursor: pointer; transition: all .18s;
+    }
+    .pill:hover { color: var(--text); border-color: var(--border2); }
+    .pill.active     { background: var(--surface3); color: var(--text); border-color: var(--border2); }
+    .pill.active-pend { background: var(--amber-dim); color: var(--amber); border-color: rgba(251,191,36,0.3); }
+    .pill.active-done { background: var(--green-dim); color: var(--green); border-color: rgba(52,211,153,0.3); }
+
+    /* ── BOARD ── */
+    .board { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 28px 32px 100px; }
+    .results-info { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+    .results-info strong { color: var(--text-sub); }
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 20px; }
+
+    /* ── CARD ── */
+    .project-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; cursor: pointer;
+      transition: transform .22s, border-color .22s, box-shadow .22s;
+      display: flex; flex-direction: column; gap: 13px;
+      position: relative; overflow: hidden;
+    }
+    .project-card::after {
+      content: ''; position: absolute; bottom: 0; right: 0; left: 0; height: 2px;
+      background: linear-gradient(90deg,var(--teal),var(--indigo));
+      transform: scaleX(0); transform-origin: right; transition: transform .25s;
+    }
+    .project-card:hover { transform: translateY(-4px); border-color: rgba(45,212,191,0.22); box-shadow: 0 16px 48px rgba(0,0,0,0.5); }
+    .project-card:hover::after { transform: scaleX(1); }
+
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .card-seq { font-size: 11px; font-weight: 800; color: var(--teal); background: var(--teal-dim); border-radius: var(--radius-xs); padding: 3px 9px; letter-spacing: .05em; flex-shrink: 0; }
+    .card-date { font-size: 11px; color: var(--text-muted); }
+
+    /* status badge */
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 800; border-radius: var(--radius-xs); padding: 3px 9px;
+    }
+    .status-badge.pending   { background: var(--amber-dim); color: var(--amber); }
+    .status-badge.completed { background: var(--green-dim);  color: var(--green); }
+
+    .card-title { font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .card-desc-preview { font-size: 12px; color: var(--text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .members-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+    .member-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--surface3); border: 1px solid var(--border2);
+      border-radius: 100px; padding: 3px 9px 3px 5px;
+      font-size: 11px; color: var(--text-sub);
+    }
+    .member-avatar {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: linear-gradient(135deg,var(--teal),var(--indigo));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border); }
+    .members-count { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+    .members-count .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); opacity: .7; }
+    .view-link { font-size: 12px; font-weight: 700; color: var(--teal); opacity: .8; transition: opacity .15s; }
+    .project-card:hover .view-link { opacity: 1; }
+
+    /* ── STATES ── */
+    .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; gap: 14px; }
+    .ring { width: 42px; height: 42px; border: 3px solid var(--border2); border-top-color: var(--teal); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-wrap p { color: var(--text-muted); font-size: 14px; }
+    .error-wrap { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 50vh; gap: 12px; text-align: center; padding: 24px; }
+    .error-wrap .eico { font-size: 44px; }
+    .error-wrap h3 { font-size: 18px; font-weight: 700; }
+    .error-wrap p { color: var(--text-muted); max-width: 400px; line-height: 1.6; }
+    .retry-btn { padding: 10px 26px; background: var(--teal-dim); border: 1px solid rgba(45,212,191,0.3); border-radius: var(--radius-sm); color: var(--teal); font-family:'Cairo',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+    .empty-state { display: none; flex-direction: column; align-items: center; text-align: center; padding: 80px 24px; gap: 12px; }
+    .empty-state .eico { font-size: 50px; }
+    .empty-state h3 { font-size: 19px; font-weight: 700; }
+    .empty-state p { color: var(--text-muted); max-width: 300px; line-height: 1.6; }
+    .empty-cta { margin-top: 8px; padding: 10px 26px; background: var(--teal-dim); border: 1px solid rgba(45,212,191,0.3); border-radius: 100px; color: var(--teal); font-family:'Cairo',sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+
+    /* ── OVERLAYS ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+
+    /* modal base */
+    .modal-box {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+      transform: scale(.94) translateY(14px); transition: transform .28s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .overlay.open .modal-box { transform: scale(1) translateY(0); }
+
+    .modal-head { padding: 26px 26px 20px; border-bottom: 1px solid var(--border); }
+    .modal-head-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+    .modal-head h2 { font-size: 18px; font-weight: 800; }
+    .modal-sub { font-size: 13px; color: var(--text-muted); }
+    .modal-close {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; color: var(--text-muted); font-size: 17px; transition: all .15s; flex-shrink: 0;
+    }
+    .modal-close:hover { background: rgba(248,113,113,0.12); color: var(--red); border-color: rgba(248,113,113,0.3); }
+    .modal-body { padding: 22px 26px; display: flex; flex-direction: column; gap: 18px; }
+    .modal-foot { padding: 16px 26px 26px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+    /* fields */
+    .field-group { display: flex; flex-direction: column; gap: 7px; }
+    .field-label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
+    .field-label span { font-weight: 400; color: var(--text-muted); font-size: 12px; }
+    .field-input, .field-textarea {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: var(--radius-sm); padding: 10px 13px;
+      color: var(--text); font-family: 'Cairo', sans-serif; font-size: 14px;
+      direction: rtl; outline: none; width: 100%; transition: border-color .2s, background .2s;
+    }
+    .field-input::placeholder, .field-textarea::placeholder { color: var(--text-muted); }
+    .field-input:focus, .field-textarea:focus { border-color: rgba(45,212,191,0.45); background: rgba(45,212,191,0.03); }
+    .field-input.err { border-color: var(--red) !important; }
+    .field-textarea { resize: none; min-height: 78px; line-height: 1.6; }
+
+    /* member slots */
+    .member-slot { display: flex; align-items: center; gap: 9px; }
+    .slot-badge { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+    .slot-badge.required { background: var(--teal-dim); color: var(--teal); }
+    .slot-badge.optional  { background: var(--surface3); color: var(--text-muted); }
+    .slot-opt-tag { font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+    .member-count-hint { font-size: 12px; color: var(--text-muted); background: var(--surface3); border-radius: var(--radius-xs); padding: 8px 12px; line-height: 1.5; }
+
+    /* buttons */
+    .btn-secondary { padding: 10px 20px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: transparent; color: var(--text-muted); font-family:'Cairo',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; }
+    .btn-secondary:hover { background: var(--surface2); color: var(--text); }
+    .btn-primary { padding: 10px 28px; border-radius: var(--radius-sm); border: none; background: linear-gradient(135deg,var(--teal),#14B8A6); color: #0A0B10; font-family:'Cairo',sans-serif; font-size:14px; font-weight:800; cursor:pointer; transition: opacity .15s, transform .1s; }
+    .btn-primary:hover { opacity:.9; transform:translateY(-1px); }
+    .btn-primary:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+    .btn-amber { padding: 10px 28px; border-radius: var(--radius-sm); border: none; background: linear-gradient(135deg,var(--amber),#F59E0B); color: #0A0B10; font-family:'Cairo',sans-serif; font-size:14px; font-weight:800; cursor:pointer; transition: opacity .15s; }
+    .btn-amber:hover { opacity:.88; }
+    .btn-amber:disabled { opacity:.4; cursor:not-allowed; }
+
+    /* ── DETAIL MODAL ── */
+    .detail-modal-box {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 20px; width: 100%; max-width: 540px; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+      transform: scale(.94) translateY(14px); transition: transform .28s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .overlay.open .detail-modal-box { transform: scale(1) translateY(0); }
+    .detail-head { padding: 26px 26px 18px; border-bottom: 1px solid var(--border); }
+    .detail-head-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .detail-seq { font-size: 11px; font-weight: 800; color: var(--teal); background: var(--teal-dim); border-radius: var(--radius-xs); padding: 3px 9px; display: inline-block; margin-bottom: 8px; }
+    .detail-title { font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 5px; }
+    .detail-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .detail-date { font-size: 12px; color: var(--text-muted); }
+    .detail-desc { margin-top: 12px; font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+    .detail-body { padding: 22px 26px; display: flex; flex-direction: column; gap: 22px; }
+    .detail-section-title { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+    .members-list { display: flex; flex-direction: column; gap: 9px; }
+    .member-row { display: flex; align-items: center; gap: 11px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 13px; }
+    .member-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg,var(--teal),var(--indigo)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .member-name { font-size: 14px; font-weight: 600; }
+    .member-role { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    /* video section in detail */
+    .video-section { display: flex; flex-direction: column; gap: 12px; }
+    .video-embed-wrap { position: relative; width: 100%; padding-bottom: 56.25%; border-radius: var(--radius-sm); overflow: hidden; background: var(--surface3); }
+    .video-embed-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+    .video-placeholder {
+      background: var(--surface3); border: 1px dashed var(--border2);
+      border-radius: var(--radius-sm); padding: 32px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+    }
+    .video-placeholder .vp-icon { font-size: 36px; }
+    .video-placeholder p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* upload video button in detail (for owner) */
+    .upload-video-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px; border-radius: var(--radius-sm);
+      border: 1px dashed rgba(251,191,36,0.4);
+      background: var(--amber-dim); color: var(--amber);
+      font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; width: 100%; transition: all .18s;
+    }
+    .upload-video-btn:hover { background: rgba(251,191,36,0.2); border-color: rgba(251,191,36,0.6); }
+
+    /* edit project button */
+    .edit-project-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 11px; border-radius: var(--radius-sm);
+      border: 1px dashed rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.1); color: var(--indigo);
+      font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; width: 100%; transition: all .18s;
+    }
+    .edit-project-btn:hover { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.6); }
+
+    /* danger / delete */
+    .btn-danger {
+      padding: 10px 22px; border-radius: var(--radius-sm); border: 1px solid rgba(248,113,113,0.35);
+      background: rgba(248,113,113,0.1); color: var(--red);
+      font-family:'Cairo',sans-serif; font-size:14px; font-weight:800; cursor:pointer; transition: all .15s;
+    }
+    .btn-danger:hover { background: rgba(248,113,113,0.2); border-color: rgba(248,113,113,0.55); }
+    .btn-danger:disabled { opacity:.4; cursor:not-allowed; }
+
+    /* confirm-delete box */
+    .confirm-delete-box {
+      border: 1px solid rgba(248,113,113,0.3); background: rgba(248,113,113,0.06);
+      border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .confirm-delete-box p { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+    .confirm-delete-box p strong { color: var(--red); }
+
+    .detail-foot { padding: 16px 26px 26px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+    /* ── UPLOAD VIDEO MODAL ── */
+    .uid-step, .url-step { display: flex; flex-direction: column; gap: 16px; }
+    .info-box { background: var(--surface3); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13px; color: var(--text-sub); line-height: 1.65; }
+    .info-box strong { color: var(--text); }
+
+    /* ── SUCCESS CARD ── */
+    .success-card {
+      background: var(--surface); border: 1px solid rgba(45,212,191,0.2);
+      border-radius: 20px; padding: 44px 36px; max-width: 400px; width: 100%; text-align: center;
+      box-shadow: 0 0 80px rgba(45,212,191,0.1);
+      transform: scale(.9); transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .overlay.open .success-card { transform: scale(1); }
+    .s-icon { font-size: 54px; margin-bottom: 10px; }
+    .success-card h3 { font-size: 22px; font-weight: 900; color: var(--teal); margin-bottom: 8px; }
+    .success-card p { color: var(--text-sub); font-size: 14px; line-height: 1.65; }
+    .s-id { display: inline-block; margin-top: 12px; padding: 8px 18px; background: var(--teal-dim); border: 1px solid rgba(45,212,191,0.25); border-radius: 8px; font-size: 13px; font-weight: 700; color: var(--teal); letter-spacing: .04em; }
+    .s-warning { margin-top: 10px; font-size: 12px; color: var(--amber); background: var(--amber-dim); border-radius: 8px; padding: 8px 12px; line-height: 1.6; }
+    .btn-done { margin-top: 22px; padding: 12px 38px; background: linear-gradient(135deg,var(--teal),#14B8A6); border: none; border-radius: var(--radius-sm); color: #0A0B10; font-family:'Cairo',sans-serif; font-size:15px; font-weight:800; cursor:pointer; }
+    .btn-done:hover { opacity:.85; }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(14px); background: var(--surface3); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 11px 20px; font-size:13px; font-weight:600; z-index: 300; opacity:0; pointer-events:none; transition: opacity .28s, transform .28s; white-space: nowrap; }
+    .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
+    .toast.t-err { border-color: rgba(248,113,113,.4); color: var(--red); }
+    .toast.t-ok  { border-color: rgba(52,211,153,.4);  color: var(--green); }
+
+    /* ── CFG BANNER ── */
+    .cfg-banner { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,.2); border-radius: var(--radius-sm); padding: 11px 16px; font-size:13px; color: var(--amber); text-align:center; margin: 0 32px 4px; display:none; }
+    .cfg-banner.on { display:block; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:640px) {
+      .site-header { padding: 0 16px; }
+      .hero { padding: 44px 16px 36px; }
+      .board { padding: 20px 16px 80px; }
+      .controls-bar { padding: 10px 16px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .modal-box, .detail-modal-box { border-radius: 16px 16px 0 0; max-height: 88vh; }
+      .overlay { align-items: flex-end; padding: 0; }
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<div class="ambient">
+  <div class="ambient-orb orb1"></div>
+  <div class="ambient-orb orb2"></div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-icon">🚀</div>
+    <span class="logo-text">مشاريع الطلاب</span>
+  </div>
+  <button class="fab" onclick="openAddModal()">إضافة مشروع</button>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">منصة مفتوحة للجميع</div>
+  <h1>سجل مشروعك<br/><em>مع فريقك</em></h1>
+  <p>أضف مشروعك الأكاديمي، شكّل فريقك، وأرفق فيديو الإنجاز عند الانتهاء.</p>
+  <div class="counter-row">
+    <div class="counter-item"><div class="counter-val" id="cntProjects">—</div><div class="counter-lbl">مشروع مسجّل</div></div>
+    <div class="counter-item"><div class="counter-val" id="cntStudents">—</div><div class="counter-lbl">طالب مشارك</div></div>
+    <div class="counter-item"><div class="counter-val" id="cntDone">—</div><div class="counter-lbl">مشروع مكتمل</div></div>
+  </div>
+</section>
+
+<div class="cfg-banner" id="cfgBanner">⚙️ لم يتم تهيئة الاتصال — أدخل SPREADSHEET_ID و APPS_SCRIPT_URL في قسم CFG</div>
+
+<!-- CONTROLS -->
+<div class="controls-bar">
+  <div class="controls-inner">
+    <div class="search-box">
+      <span class="ico">🔍</span>
+      <input type="text" id="searchInput" placeholder="ابحث عن مشروع أو اسم طالب…" oninput="applyFilters()" />
+    </div>
+    <div class="filter-pills">
+      <button class="pill active"      data-f="all"       onclick="setFilter('all',this)">الكل</button>
+      <button class="pill"             data-f="pending"   onclick="setFilter('pending',this)">⏳ قيد التنفيذ</button>
+      <button class="pill"             data-f="completed" onclick="setFilter('completed',this)">✅ مكتملة</button>
+    </div>
+    <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+      <option value="newest">الأحدث أولاً</option>
+      <option value="oldest">الأقدم أولاً</option>
+      <option value="alpha">أبجدياً</option>
+      <option value="members">الأكثر أعضاء</option>
+    </select>
+  </div>
+</div>
+
+<!-- BOARD -->
+<main class="board">
+  <div class="loading-wrap" id="loadingWrap"><div class="ring"></div><p>جارٍ تحميل المشاريع…</p></div>
+  <div class="error-wrap" id="errorWrap">
+    <div class="eico">⚠️</div><h3>تعذّر تحميل البيانات</h3>
+    <p id="errMsg">حدث خطأ في الاتصال.</p>
+    <button class="retry-btn" onclick="loadProjects()">إعادة المحاولة</button>
+  </div>
+  <div class="results-info" id="resultsInfo" style="display:none"></div>
+  <div class="cards-grid"   id="cardsGrid"   style="display:none"></div>
+  <div class="empty-state"  id="emptyState">
+    <div class="eico">📭</div><h3>لا توجد مشاريع بعد</h3>
+    <p>كن أول من يضيف مشروعه!</p>
+    <button class="empty-cta" onclick="openAddModal()">+ إضافة مشروع الآن</button>
+  </div>
+</main>
+
+<!-- ══════════ ADD PROJECT MODAL ══════════ -->
+<div class="overlay" id="addOverlay" onclick="closeOverlay('addOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>إضافة مشروع جديد</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('addOverlay')">✕</button>
+      </div>
+      <p class="modal-sub">أدخل بيانات مشروعك وأعضاء فريقك</p>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label class="field-label">اسم المشروع <span>(إلزامي)</span></label>
+        <input type="text" class="field-input" id="projName" placeholder="مثال: نظام إدارة المرضى بالذكاء الاصطناعي" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">وصف مختصر <span>(إلزامي)</span></label>
+        <textarea class="field-textarea" id="projDesc" placeholder="فكرة عامة عن المشروع وأهدافه…"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label">أعضاء الفريق</label>
+        <div class="member-count-hint">طالب واحد على الأقل — خمسة كحد أقصى.</div>
+        <div id="memberSlots" style="display:flex;flex-direction:column;gap:9px;margin-top:4px;"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeOverlayDirect('addOverlay')">إلغاء</button>
+      <button class="btn-primary" id="submitBtn" onclick="submitProject()">نشر المشروع ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ DETAIL MODAL ══════════ -->
+<div class="overlay" id="detailOverlay" onclick="closeOverlay('detailOverlay',event)">
+  <div class="detail-modal-box">
+    <div class="detail-head">
+      <div class="detail-head-top">
+        <div>
+          <div class="detail-seq" id="dSeq"></div>
+          <div class="detail-title" id="dTitle"></div>
+          <div class="detail-meta">
+            <span class="detail-date" id="dDate"></span>
+            <span class="status-badge" id="dBadge"></span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeOverlayDirect('detailOverlay')">✕</button>
+      </div>
+      <div class="detail-desc" id="dDesc" style="display:none"></div>
+    </div>
+    <div class="detail-body">
+      <!-- members -->
+      <div>
+        <div class="detail-section-title">أعضاء الفريق</div>
+        <div class="members-list" id="dMembers"></div>
+      </div>
+      <!-- video -->
+      <div class="video-section">
+        <div class="detail-section-title">فيديو المشروع</div>
+        <div id="dVideoArea"></div>
+      </div>
+    </div>
+    <div class="detail-foot" id="dFoot"></div>
+  </div>
+</div>
+
+<!-- ══════════ UPLOAD VIDEO MODAL ══════════ -->
+<div class="overlay" id="uploadOverlay" onclick="closeOverlay('uploadOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>رفع فيديو المشروع</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('uploadOverlay')">✕</button>
+      </div>
+      <p class="modal-sub" id="uploadModalSub"></p>
+    </div>
+    <div class="modal-body">
+      <!-- STEP 1: verify UID -->
+      <div class="uid-step" id="uidStep">
+        <div class="info-box">
+          أدخل <strong>رمز مشروعك</strong> الذي حصلت عليه عند التسجيل للتحقق من هويتك.
+        </div>
+        <div class="field-group">
+          <label class="field-label">رمز المشروع</label>
+          <input type="text" class="field-input" id="uidInput" placeholder="مثال: P-LB9K3XYZ" autocomplete="off" />
+        </div>
+      </div>
+      <!-- STEP 2: enter video URL -->
+      <div class="url-step" id="urlStep" style="display:none">
+        <div class="info-box">
+          ارفع الفيديو على <strong>Google Drive</strong> أو <strong>YouTube</strong> ثم الصق الرابط هنا.<br/>
+          تأكد أن الفيديو مضبوط على <strong>"مشاركة مع أي شخص لديه الرابط"</strong>.
+        </div>
+        <div class="field-group">
+          <label class="field-label">رابط الفيديو</label>
+          <input type="text" class="field-input" id="videoUrlInput" placeholder="https://drive.google.com/... أو https://youtu.be/..." autocomplete="off" />
+        </div>
+        <div id="videoPreviewWrap" style="display:none">
+          <div class="video-embed-wrap" id="videoPreviewEmbed"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeOverlayDirect('uploadOverlay')">إلغاء</button>
+      <button class="btn-amber" id="uidVerifyBtn" onclick="verifyUID()">التحقق من الرمز ←</button>
+      <button class="btn-amber" id="urlSubmitBtn" onclick="submitVideo()" style="display:none">حفظ الفيديو ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ EDIT PROJECT MODAL ══════════ -->
+<div class="overlay" id="editOverlay" onclick="closeOverlay('editOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>تعديل بيانات المشروع</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('editOverlay')">✕</button>
+      </div>
+      <p class="modal-sub" id="editModalSub"></p>
+    </div>
+    <div class="modal-body">
+      <!-- STEP 1: verify UID -->
+      <div id="editUidStep">
+        <div class="info-box">
+          أدخل <strong>رمز مشروعك</strong> للتحقق من هويتك قبل التعديل.
+        </div>
+        <div class="field-group" style="margin-top:12px">
+          <label class="field-label">رمز المشروع</label>
+          <input type="text" class="field-input" id="editUidInput" placeholder="مثال: P-LB9K3XYZ" autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- STEP 2: edit form -->
+      <div id="editFormStep" style="display:none">
+        <div class="field-group">
+          <label class="field-label">اسم المشروع <span>(إلزامي)</span></label>
+          <input type="text" class="field-input" id="editProjName" autocomplete="off" />
+        </div>
+        <div class="field-group" style="margin-top:14px">
+          <label class="field-label">وصف مختصر <span>(إلزامي)</span></label>
+          <textarea class="field-textarea" id="editProjDesc"></textarea>
+        </div>
+        <div class="field-group" style="margin-top:14px">
+          <label class="field-label">أعضاء الفريق</label>
+          <div class="member-count-hint">طالب واحد على الأقل — خمسة كحد أقصى.</div>
+          <div id="editMemberSlots" style="display:flex;flex-direction:column;gap:9px;margin-top:8px;"></div>
+        </div>
+
+        <!-- DELETE SECTION -->
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+          <div class="detail-section-title" style="color:var(--red)">حذف المشروع</div>
+          <div id="deletePromptArea">
+            <button class="btn-danger" style="width:100%" onclick="showDeleteConfirm()">🗑️ حذف هذا المشروع نهائياً</button>
+          </div>
+          <div id="deleteConfirmArea" style="display:none;margin-top:10px;">
+            <div class="confirm-delete-box">
+              <p>⚠️ هذا الإجراء <strong>لا يمكن التراجع عنه</strong>. سيُحذف المشروع وكل بياناته بشكل نهائي من اللوحة والجدول.</p>
+              <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button class="btn-secondary" onclick="hideDeleteConfirm()">تراجع</button>
+                <button class="btn-danger" id="confirmDeleteBtn" onclick="deleteProject()">نعم، احذف نهائياً</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeOverlayDirect('editOverlay')">إلغاء</button>
+      <button class="btn-amber" id="editUidVerifyBtn" onclick="verifyEditUID()">التحقق من الرمز ←</button>
+      <button class="btn-primary" id="editSaveBtn" onclick="submitEdit()" style="display:none">حفظ التعديلات ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ SUCCESS MODAL ══════════ -->
+<div class="overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="s-icon">🎉</div>
+    <h3>تم نشر المشروع!</h3>
+    <p>ظهر مشروعك على اللوحة. احتفظ بالرمز لرفع الفيديو لاحقاً.</p>
+    <div class="s-id" id="sId"></div>
+    <div class="s-warning">⚠️ احتفظ بهذا الرمز — ستحتاجه لرفع فيديو مشروعك</div>
+    <button class="btn-done" onclick="closeOverlayDirect('successOverlay')">رائع، فهمت!</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══════════ SCRIPT ══════════ -->
+<script>
+/* ─── CONFIG ─── */
+const CFG = {
+  SPREADSHEET_ID:  '15zOV3fJaSyruWcGRo0WKy-h6HivjBR689CdvdZPWCfI',
+  SHEET_NAME:      'Projects',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxS9SxMjE3lmeFdvK-hcT2VhliWgs0s-0lWsrOljoIy7d3qSY4R_egTXuR9Xs9ji7AE/exec',
+  MAX_MEMBERS: 5,
+  MIN_MEMBERS: 1,
+};
+
+/* ─── STATE ─── */
+let allProjects  = [];
+let activeFilter = 'all';
+let uploadTargetUID = null;   // UID المشروع المراد رفع فيديو له
+let editTargetUID   = null;   // UID المشروع المراد تعديله/حذفه
+
+/* ── BOOT ── */
+document.addEventListener('DOMContentLoaded', () => {
+  buildMemberSlots();
+  loadProjects();
+
+  // preview video URL as user types
+  document.getElementById('videoUrlInput').addEventListener('input', previewVideoURL);
+});
+
+/* ══════════════════════════════════════════
+   LOAD
+══════════════════════════════════════════ */
+async function loadProjects() {
+  screen('loading');
+  if (CFG.SPREADSHEET_ID === 'YOUR_SPREADSHEET_ID_HERE') {
+    document.getElementById('cfgBanner').classList.add('on');
+    screen('error');
+    document.getElementById('errMsg').textContent = 'لم يتم تهيئة المعرّف.';
+    return;
+  }
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${CFG.SPREADSHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(CFG.SHEET_NAME)}`;
+    const text = await fetch(url).then(r => { if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}')+1));
+    parseProjects(json);
+    screen('grid');
+  } catch(e) {
+    screen('error');
+    document.getElementById('errMsg').textContent = 'خطأ: ' + e.message;
+  }
+}
+
+function parseProjects(json) {
+  /* الأعمدة:
+     A:ProjectUID  B:ProjectName  C:Description
+     D:Student1    E:Student2     F:Student3   G:Student4  H:Student5
+     I:Timestamp   J:VideoURL     K:Status                            */
+  const rows = json.table.rows;
+  allProjects = rows
+    .filter(r => r.c && r.c[0] && r.c[0].v)
+    .map((r, i) => {
+      const g = idx => (r.c[idx] && r.c[idx].v != null) ? String(r.c[idx].v).trim() : '';
+      const members = [g(3),g(4),g(5),g(6),g(7)].filter(Boolean);
+      const status  = g(10) === 'completed' ? 'completed' : 'pending';
+      return { uid:g(0), name:g(1), desc:g(2), members, date:g(8), videoURL:g(9), status, seq:i+1 };
+    });
+  updateCounters();
+  applyFilters();
+}
+
+/* ══════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════ */
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active','active-pend','active-done'));
+  if (f === 'all')       btn.classList.add('active');
+  if (f === 'pending')   btn.classList.add('active-pend');
+  if (f === 'completed') btn.classList.add('active-done');
+  applyFilters();
+}
+
+function applyFilters() {
+  const q    = document.getElementById('searchInput').value.trim().toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+  let list   = [...allProjects];
+
+  if (activeFilter === 'pending')   list = list.filter(p => p.status === 'pending');
+  if (activeFilter === 'completed') list = list.filter(p => p.status === 'completed');
+  if (q) list = list.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    p.desc.toLowerCase().includes(q) ||
+    p.members.some(m => m.toLowerCase().includes(q))
+  );
+  if (sort === 'newest')  list.sort((a,b) => b.seq - a.seq);
+  if (sort === 'oldest')  list.sort((a,b) => a.seq - b.seq);
+  if (sort === 'alpha')   list.sort((a,b) => a.name.localeCompare(b.name,'ar'));
+  if (sort === 'members') list.sort((a,b) => b.members.length - a.members.length);
+  renderGrid(list);
+}
+
+function renderGrid(list) {
+  const grid  = document.getElementById('cardsGrid');
+  const info  = document.getElementById('resultsInfo');
+  const empty = document.getElementById('emptyState');
+
+  if (!allProjects.length) {
+    grid.style.display = 'none'; info.style.display = 'none'; empty.style.display = 'flex'; return;
+  }
+  if (!list.length) {
+    grid.style.display = 'none'; info.style.display = 'block';
+    info.innerHTML = 'لا توجد نتائج تطابق البحث.'; empty.style.display = 'none'; return;
+  }
+  empty.style.display = 'none'; info.style.display = 'block'; grid.style.display = 'grid';
+  info.innerHTML = `عرض <strong>${list.length}</strong> مشروع`;
+  grid.innerHTML = list.map(p => cardHTML(p)).join('');
+  requestAnimationFrame(() => {
+    grid.querySelectorAll('.project-card').forEach((el,i) => {
+      el.style.opacity='0'; el.style.transform='translateY(10px)';
+      setTimeout(() => { el.style.transition='opacity .28s,transform .28s'; el.style.opacity='1'; el.style.transform='translateY(0)'; }, i*35);
+    });
+  });
+}
+
+function cardHTML(p) {
+  const preview  = p.members.slice(0,3);
+  const extra    = p.members.length - preview.length;
+  const chips    = preview.map(m => `<div class="member-chip"><div class="member-avatar">${initial(m)}</div>${esc(m)}</div>`).join('');
+  const moreChip = extra > 0 ? `<div class="member-chip" style="color:var(--text-muted)">+${extra}</div>` : '';
+  const badge    = p.status === 'completed'
+    ? `<span class="status-badge completed">✅ مكتمل</span>`
+    : `<span class="status-badge pending">⏳ قيد التنفيذ</span>`;
+  return `
+    <div class="project-card" onclick="openDetail('${esc(p.uid)}')">
+      <div class="card-top">
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
+          <div class="card-seq">#${p.seq}</div>
+          ${badge}
+        </div>
+        <div class="card-date">${formatDate(p.date)}</div>
+      </div>
+      <div class="card-title">${esc(p.name)}</div>
+      ${p.desc ? `<div class="card-desc-preview">${esc(p.desc)}</div>` : ''}
+      <div class="members-row">${chips}${moreChip}</div>
+      <div class="card-footer">
+        <div class="members-count"><span class="dot"></span>${p.members.length} ${p.members.length===1?'طالب':'طلاب'}</div>
+        <span class="view-link">عرض التفاصيل ←</span>
+      </div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════
+   DETAIL MODAL
+══════════════════════════════════════════ */
+function openDetail(uid) {
+  const p = allProjects.find(x => x.uid === uid);
+  if (!p) return;
+
+  document.getElementById('dSeq').textContent   = '#' + p.seq;
+  document.getElementById('dTitle').textContent = p.name;
+  document.getElementById('dDate').textContent  = formatDate(p.date);
+
+  const badge = document.getElementById('dBadge');
+  badge.className = 'status-badge ' + p.status;
+  badge.textContent = p.status === 'completed' ? '✅ مكتمل' : '⏳ قيد التنفيذ';
+
+  const descEl = document.getElementById('dDesc');
+  if (p.desc) { descEl.textContent = p.desc; descEl.style.display = 'block'; }
+  else          { descEl.style.display = 'none'; }
+
+  // members
+  const roles = ['قائد الفريق','عضو','عضو','عضو','عضو'];
+  document.getElementById('dMembers').innerHTML = p.members.map((m,i) =>
+    `<div class="member-row">
+       <div class="member-av">${initial(m)}</div>
+       <div><div class="member-name">${esc(m)}</div><div class="member-role">${roles[i]||'عضو'}</div></div>
+     </div>`
+  ).join('');
+
+  // video area
+  const vArea = document.getElementById('dVideoArea');
+  if (p.status === 'completed' && p.videoURL) {
+    const embedSrc = getEmbedURL(p.videoURL);
+    if (embedSrc) {
+      vArea.innerHTML = `<div class="video-embed-wrap"><iframe src="${embedSrc}" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div>`;
+    } else {
+      vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>رابط الفيديو: <a href="${esc(p.videoURL)}" target="_blank" style="color:var(--teal)">${esc(p.videoURL)}</a></p></div>`;
+    }
+  } else if (p.status === 'pending') {
+    vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>لم يُرفع فيديو بعد — المشروع قيد التنفيذ.</p></div>`;
+  } else {
+    vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>المشروع مكتمل لكن لا يوجد فيديو مرتبط.</p></div>`;
+  }
+
+  // footer buttons
+  const foot = document.getElementById('dFoot');
+  let footHTML = `<button class="btn-secondary" onclick="closeOverlayDirect('detailOverlay')">إغلاق</button>`;
+  // زر رفع الفيديو — يظهر دائماً ليتمكن صاحب المشروع من رفعه
+  if (p.status === 'pending' || !p.videoURL) {
+    footHTML += `<button class="upload-video-btn" style="flex:1" onclick="openUploadModal('${esc(p.uid)}','${esc(p.name)}')">📤 رفع الفيديو</button>`;
+  }
+  // زر تعديل/حذف المشروع — يظهر دائماً لصاحب المشروع
+  footHTML += `<button class="edit-project-btn" style="flex:1" onclick="openEditModal('${esc(p.uid)}','${esc(p.name)}')">✏️ تعديل / حذف</button>`;
+  foot.innerHTML = footHTML;
+
+  openOverlay('detailOverlay');
+}
+
+/* ══════════════════════════════════════════
+   UPLOAD VIDEO MODAL
+══════════════════════════════════════════ */
+function openUploadModal(uid, name) {
+  uploadTargetUID = uid;
+  document.getElementById('uploadModalSub').textContent = 'مشروع: ' + name;
+  document.getElementById('uidInput').value    = '';
+  document.getElementById('videoUrlInput').value = '';
+  document.getElementById('uidInput').classList.remove('err');
+  document.getElementById('videoUrlInput').classList.remove('err');
+  document.getElementById('uidStep').style.display  = 'flex';
+  document.getElementById('urlStep').style.display  = 'none';
+  document.getElementById('uidVerifyBtn').style.display  = 'inline-flex';
+  document.getElementById('urlSubmitBtn').style.display  = 'none';
+  document.getElementById('videoPreviewWrap').style.display = 'none';
+  closeOverlayDirect('detailOverlay');
+  openOverlay('uploadOverlay');
+}
+
+function verifyUID() {
+  const entered = document.getElementById('uidInput').value.trim();
+  if (!entered) { document.getElementById('uidInput').classList.add('err'); toast('أدخل الرمز أولاً','err'); return; }
+  if (entered !== uploadTargetUID) {
+    document.getElementById('uidInput').classList.add('err');
+    toast('الرمز غير صحيح — تحقق من الرمز الذي حصلت عليه عند التسجيل','err');
+    return;
+  }
+  // رمز صحيح — انتقل للخطوة الثانية
+  document.getElementById('uidStep').style.display  = 'none';
+  document.getElementById('urlStep').style.display  = 'flex';
+  document.getElementById('uidVerifyBtn').style.display  = 'none';
+  document.getElementById('urlSubmitBtn').style.display  = 'inline-flex';
+  toast('✓ تم التحقق — أدخل رابط الفيديو','ok');
+}
+
+function previewVideoURL() {
+  const url = document.getElementById('videoUrlInput').value.trim();
+  const wrap = document.getElementById('videoPreviewWrap');
+  const embed = document.getElementById('videoPreviewEmbed');
+  if (!url) { wrap.style.display = 'none'; return; }
+  const src = getEmbedURL(url);
+  if (src) {
+    embed.innerHTML = `<iframe src="${src}" allowfullscreen></iframe>`;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+async function submitVideo() {
+  const videoURL = document.getElementById('videoUrlInput').value.trim();
+  if (!videoURL) { document.getElementById('videoUrlInput').classList.add('err'); toast('أدخل رابط الفيديو','err'); return; }
+
+  const btn = document.getElementById('urlSubmitBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ الحفظ…';
+
+  const params = new URLSearchParams({
+    action:   'addVideo',
+    uid:      uploadTargetUID,
+    videoURL: videoURL,
+  });
+
+  fetch(CFG.APPS_SCRIPT_URL + '?' + params, { method:'GET', mode:'no-cors' }).catch(()=>{});
+
+  // تحديث محلي فوري
+  const p = allProjects.find(x => x.uid === uploadTargetUID);
+  if (p) { p.videoURL = videoURL; p.status = 'completed'; }
+
+  updateCounters();
+  applyFilters();
+  closeOverlayDirect('uploadOverlay');
+  toast('✅ تم رفع الفيديو وتحديث حالة المشروع إلى مكتمل','ok');
+
+  btn.disabled = false; btn.textContent = 'حفظ الفيديو ←';
+}
+
+/* ══════════════════════════════════════════
+   EDIT / DELETE PROJECT MODAL
+══════════════════════════════════════════ */
+function openEditModal(uid, name) {
+  editTargetUID = uid;
+  document.getElementById('editModalSub').textContent = 'مشروع: ' + name;
+
+  // reset to step 1
+  document.getElementById('editUidInput').value = '';
+  document.getElementById('editUidInput').classList.remove('err');
+  document.getElementById('editUidStep').style.display  = 'block';
+  document.getElementById('editFormStep').style.display = 'none';
+  document.getElementById('editUidVerifyBtn').style.display = 'inline-flex';
+  document.getElementById('editSaveBtn').style.display      = 'none';
+  hideDeleteConfirm();
+
+  closeOverlayDirect('detailOverlay');
+  openOverlay('editOverlay');
+  setTimeout(() => document.getElementById('editUidInput').focus(), 280);
+}
+
+function verifyEditUID() {
+  const entered = document.getElementById('editUidInput').value.trim();
+  if (!entered) { document.getElementById('editUidInput').classList.add('err'); toast('أدخل الرمز أولاً','err'); return; }
+  if (entered !== editTargetUID) {
+    document.getElementById('editUidInput').classList.add('err');
+    toast('الرمز غير صحيح — تحقق من الرمز الذي حصلت عليه عند التسجيل','err');
+    return;
+  }
+
+  // رمز صحيح — عبّئ النموذج بالبيانات الحالية
+  const p = allProjects.find(x => x.uid === editTargetUID);
+  if (!p) { toast('تعذّر العثور على المشروع','err'); return; }
+
+  document.getElementById('editProjName').value = p.name;
+  document.getElementById('editProjDesc').value = p.desc;
+  buildEditMemberSlots(p.members);
+
+  document.getElementById('editUidStep').style.display  = 'none';
+  document.getElementById('editFormStep').style.display = 'block';
+  document.getElementById('editUidVerifyBtn').style.display = 'none';
+  document.getElementById('editSaveBtn').style.display      = 'inline-flex';
+  toast('✓ تم التحقق — يمكنك التعديل الآن','ok');
+}
+
+function buildEditMemberSlots(currentMembers) {
+  let html = '';
+  for (let i = 1; i <= CFG.MAX_MEMBERS; i++) {
+    const req = i <= CFG.MIN_MEMBERS;
+    const val = currentMembers[i-1] || '';
+    html += `<div class="member-slot">
+      <div class="slot-badge ${req?'required':'optional'}">${i}</div>
+      <input type="text" class="field-input" id="editMem${i}" value="${esc(val)}"
+             placeholder="${req?'اسم الطالب (إلزامي)':'اسم الطالب (اختياري)'}" autocomplete="off" />
+      ${!req ? '<span class="slot-opt-tag">اختياري</span>' : ''}
+    </div>`;
+  }
+  document.getElementById('editMemberSlots').innerHTML = html;
+}
+
+async function submitEdit() {
+  const name = document.getElementById('editProjName').value.trim();
+  const desc = document.getElementById('editProjDesc').value.trim();
+  const members = [];
+  for (let i=1;i<=CFG.MAX_MEMBERS;i++) {
+    const v = document.getElementById('editMem'+i)?.value.trim();
+    if (v) members.push(v);
+  }
+
+  let ok = true;
+  const check = (id, val) => { const el=document.getElementById(id); if(!val){el.classList.add('err');ok=false;}else el.classList.remove('err'); };
+  check('editProjName', name);
+  check('editProjDesc', desc);
+  check('editMem1', document.getElementById('editMem1').value.trim());
+  if (!ok) { toast('يرجى ملء الحقول الإلزامية','err'); return; }
+
+  const btn = document.getElementById('editSaveBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ الحفظ…';
+
+  const params = new URLSearchParams({
+    action: 'editProject',
+    uid: editTargetUID,
+    name, desc,
+    s1: members[0]||'', s2: members[1]||'', s3: members[2]||'', s4: members[3]||'', s5: members[4]||'',
+  });
+  fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+
+  // تحديث محلي فوري
+  const p = allProjects.find(x => x.uid === editTargetUID);
+  if (p) { p.name = name; p.desc = desc; p.members = members.filter(Boolean); }
+
+  updateCounters();
+  applyFilters();
+  closeOverlayDirect('editOverlay');
+  toast('✅ تم حفظ التعديلات بنجاح','ok');
+
+  btn.disabled = false; btn.textContent = 'حفظ التعديلات ←';
+}
+
+function showDeleteConfirm() {
+  document.getElementById('deletePromptArea').style.display  = 'none';
+  document.getElementById('deleteConfirmArea').style.display = 'block';
+}
+function hideDeleteConfirm() {
+  document.getElementById('deletePromptArea').style.display  = 'block';
+  document.getElementById('deleteConfirmArea').style.display = 'none';
+}
+
+async function deleteProject() {
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ الحذف…';
+
+  const params = new URLSearchParams({ action: 'deleteProject', uid: editTargetUID });
+  fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+
+  // إزالة محلية فورية
+  allProjects = allProjects.filter(x => x.uid !== editTargetUID);
+  allProjects.forEach((p,i) => p.seq = allProjects.length - i);
+
+  updateCounters();
+  applyFilters();
+  closeOverlayDirect('editOverlay');
+  toast('🗑️ تم حذف المشروع نهائياً','ok');
+
+  btn.disabled = false; btn.textContent = 'نعم، احذف نهائياً';
+}
+
+/* ══════════════════════════════════════════
+   ADD PROJECT
+══════════════════════════════════════════ */
+function buildMemberSlots() {
+  let html = '';
+  for (let i = 1; i <= CFG.MAX_MEMBERS; i++) {
+    const req = i <= CFG.MIN_MEMBERS;
+    html += `<div class="member-slot">
+      <div class="slot-badge ${req?'required':'optional'}">${i}</div>
+      <input type="text" class="field-input" id="mem${i}"
+             placeholder="${req?'اسم الطالب (إلزامي)':'اسم الطالب (اختياري)'}" autocomplete="off" />
+      ${!req ? '<span class="slot-opt-tag">اختياري</span>' : ''}
+    </div>`;
+  }
+  document.getElementById('memberSlots').innerHTML = html;
+}
+
+function openAddModal() {
+  ['projName','projDesc'].forEach(id => {
+    document.getElementById(id).value = '';
+    document.getElementById(id).classList.remove('err');
+  });
+  for (let i=1;i<=CFG.MAX_MEMBERS;i++) {
+    const el = document.getElementById('mem'+i);
+    if (el) { el.value=''; el.classList.remove('err'); }
+  }
+  openOverlay('addOverlay');
+  setTimeout(() => document.getElementById('projName').focus(), 280);
+}
+
+async function submitProject() {
+  const name = document.getElementById('projName').value.trim();
+  const desc = document.getElementById('projDesc').value.trim();
+  const members = [];
+  for (let i=1;i<=CFG.MAX_MEMBERS;i++) {
+    const v = document.getElementById('mem'+i)?.value.trim();
+    if (v) members.push(v);
+  }
+
+  let ok = true;
+  const check = (id, val) => { const el=document.getElementById(id); if(!val){el.classList.add('err');ok=false;}else el.classList.remove('err'); };
+  check('projName', name);
+  check('projDesc', desc);
+  check('mem1', document.getElementById('mem1').value.trim());
+  if (!ok) { toast('يرجى ملء الحقول الإلزامية','err'); return; }
+
+  const uid = 'P-' + Date.now().toString(36).toUpperCase();
+  const btn = document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='جارٍ النشر…';
+
+  const params = new URLSearchParams({ action:'addProject', uid, name, desc, s1:members[0]||'', s2:members[1]||'', s3:members[2]||'', s4:members[3]||'', s5:members[4]||'' });
+  fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+
+  allProjects.unshift({ uid, name, desc, members:members.filter(Boolean), date:new Date().toISOString(), videoURL:'', status:'pending', seq:allProjects.length+1 });
+  allProjects.forEach((p,i) => p.seq = allProjects.length - i);
+
+  updateCounters(); applyFilters(); closeOverlayDirect('addOverlay');
+  document.getElementById('sId').textContent = uid;
+  openOverlay('successOverlay');
+
+  btn.disabled=false; btn.textContent='نشر المشروع ←';
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function getEmbedURL(url) {
+  if (!url) return null;
+  // YouTube
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  // Google Drive
+  const gd = url.match(/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)/);
+  if (gd) return `https://drive.google.com/file/d/${gd[1]}/preview`;
+  return null;
+}
+
+function screen(s) {
+  document.getElementById('loadingWrap').style.display = s==='loading'?'flex':'none';
+  document.getElementById('errorWrap').style.display   = s==='error'  ?'flex':'none';
+  document.getElementById('cardsGrid').style.display   = s==='grid'   ?'grid':'none';
+  document.getElementById('resultsInfo').style.display = s==='grid'   ?'block':'none';
+  if (s!=='grid') document.getElementById('emptyState').style.display='none';
+}
+
+function updateCounters() {
+  const done = allProjects.filter(p=>p.status==='completed').length;
+  const students = allProjects.reduce((a,p)=>a+p.members.length,0);
+  animNum('cntProjects', allProjects.length);
+  animNum('cntStudents', students);
+  animNum('cntDone', done);
+}
+
+function animNum(id, target) {
+  const el=document.getElementById(id); let cur=0;
+  const step=Math.max(1,Math.ceil(target/35));
+  const t=setInterval(()=>{ cur=Math.min(cur+step,target); el.textContent=cur; if(cur>=target)clearInterval(t); },22);
+}
+
+function openOverlay(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeOverlayDirect(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeOverlay(id,e) { if(e.target===document.getElementById(id)) closeOverlayDirect(id); }
+
+let toastT;
+function toast(msg,type='ok') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className=`toast t-${type} show`;
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),3400);
+}
+
+function initial(n) { return String(n).trim().charAt(0).toUpperCase(); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function formatDate(raw) {
+  if (!raw) return '';
+  try { const d=new Date(raw); if(isNaN(d))return''; return d.toLocaleDateString('ar-SY',{year:'numeric',month:'short',day:'numeric'}); }
+  catch { return ''; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') ['addOverlay','detailOverlay','uploadOverlay','editOverlay','successOverlay'].forEach(closeOverlayDirect);
+});
+</script>
+</body>
+</html>
