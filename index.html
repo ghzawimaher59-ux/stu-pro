@@ -353,6 +353,42 @@
     .btn-done { margin-top: 22px; padding: 12px 38px; background: linear-gradient(135deg,var(--teal),#14B8A6); border: none; border-radius: var(--radius-sm); color: #0A0B10; font-family:'Cairo',sans-serif; font-size:15px; font-weight:800; cursor:pointer; }
     .btn-done:hover { opacity:.85; }
 
+    /* ── ADMIN PANEL ── */
+    .admin-modal-box {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 20px; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+      transform: scale(.94) translateY(14px); transition: transform .28s cubic-bezier(.175,.885,.32,1.275);
+    }
+    .overlay.open .admin-modal-box { transform: scale(1) translateY(0); }
+    .admin-tabs { display: flex; gap: 6px; padding: 0 26px; margin-top: 14px; }
+    .admin-tab {
+      padding: 8px 18px; border-radius: 100px; border: 1px solid var(--border2);
+      background: transparent; color: var(--text-muted); font-family:'Cairo',sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all .15s;
+    }
+    .admin-tab.active { background: var(--surface3); color: var(--teal); border-color: rgba(45,212,191,0.3); }
+    .admin-search-wrap { padding: 14px 26px 0; }
+    .admin-add-row { padding: 0 26px 14px; }
+    .admin-list { display: flex; flex-direction: column; gap: 8px; padding: 14px 26px 26px; }
+    .admin-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 11px 13px;
+    }
+    .admin-row-main { flex: 1; min-width: 0; }
+    .admin-row-title { font-size: 13px; font-weight: 700; }
+    .admin-row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .admin-row-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .admin-icon-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      background: var(--surface3); border: 1px solid var(--border2); border-radius: 8px;
+      cursor: pointer; font-size: 14px; transition: all .15s;
+    }
+    .admin-icon-btn:hover { background: var(--surface); border-color: rgba(99,102,241,0.4); }
+    .admin-icon-btn.danger:hover { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.4); }
+    .admin-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 30px 10px; }
+
     /* ── TOAST ── */
     .toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(14px); background: var(--surface3); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 11px 20px; font-size:13px; font-weight:600; z-index: 300; opacity:0; pointer-events:none; transition: opacity .28s, transform .28s; white-space: nowrap; }
     .toast.show { opacity:1; transform: translateX(-50%) translateY(0); }
@@ -370,11 +406,206 @@
       .board { padding: 20px 16px 80px; }
       .controls-bar { padding: 10px 16px; }
       .cards-grid { grid-template-columns: 1fr; }
-      .modal-box, .detail-modal-box { border-radius: 16px 16px 0 0; max-height: 88vh; }
+      .modal-box, .detail-modal-box, .admin-modal-box { border-radius: 16px 16px 0 0; max-height: 88vh; }
       .overlay { align-items: flex-end; padding: 0; }
     }
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+    /* ══════════════════════════════════════════
+       ACCOUNT BUTTON IN HEADER
+    ══════════════════════════════════════════ */
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .account-btn {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: var(--surface2); border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; color: var(--text-sub);
+      overflow: hidden; transition: border-color .2s;
+      padding: 0;
+    }
+    .account-btn:hover { border-color: rgba(45,212,191,0.4); }
+    .account-btn img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ══════════════════════════════════════════
+       SIDE PANEL + BACKDROP BLUR
+    ══════════════════════════════════════════ */
+    .page-blur-overlay {
+      position: fixed; inset: 0; z-index: 150;
+      background: rgba(5,6,10,0.45);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .page-blur-overlay.open { opacity: 1; pointer-events: all; }
+
+    .side-panel {
+      position: fixed; top: 0; bottom: 0; right: 0; z-index: 151;
+      width: 380px; max-width: 92vw;
+      background: var(--surface); border-left: 1px solid var(--border2);
+      box-shadow: -24px 0 80px rgba(0,0,0,0.55);
+      transform: translateX(100%); transition: transform .32s cubic-bezier(.175,.885,.32,1.275);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .side-panel.open { transform: translateX(0); }
+    .side-panel-head {
+      padding: 20px 22px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .side-panel-head h2 { font-size: 16px; font-weight: 800; }
+    .side-panel-body { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+
+    /* logged-out state */
+    .sp-guest-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 28px 12px; }
+    .sp-guest-icon { font-size: 46px; }
+    .sp-guest-card p { color: var(--text-muted); font-size: 13px; line-height: 1.7; max-width: 260px; }
+    .sp-login-btn {
+      padding: 11px 30px; border-radius: 100px; border: none;
+      background: linear-gradient(135deg,var(--teal),#14B8A6); color: #0A0B10;
+      font-family: 'Cairo', sans-serif; font-size: 14px; font-weight: 800; cursor: pointer;
+      box-shadow: 0 4px 24px rgba(45,212,191,0.3);
+    }
+    .sp-login-btn:hover { opacity: .92; }
+
+    /* logged-in profile */
+    .sp-profile { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; padding: 6px 0 8px; }
+    .sp-avatar { width: 78px; height: 78px; border-radius: 50%; background: var(--surface3); border: 2px solid var(--border2); overflow: hidden; }
+    .sp-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .sp-profile-name { font-size: 16px; font-weight: 800; }
+    .sp-profile-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .sp-profile-meta .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-muted); }
+
+    .sp-section { display: flex; flex-direction: column; gap: 10px; }
+    .sp-section-title { font-size: 12px; font-weight: 800; color: var(--text-muted); letter-spacing: .04em; }
+    .sp-mini-card {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 14px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: border-color .2s;
+    }
+    .sp-mini-card:hover { border-color: rgba(45,212,191,0.25); }
+    .sp-mini-title { font-size: 13px; font-weight: 700; }
+    .sp-mini-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .sp-mini-badge { align-self: flex-start; }
+
+    .sp-empty-mini { text-align: center; padding: 20px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .sp-empty-mini p { font-size: 12px; color: var(--text-muted); }
+    .sp-add-mini-btn {
+      padding: 9px 22px; border-radius: 100px; border: 1px solid rgba(45,212,191,0.3);
+      background: var(--teal-dim); color: var(--teal); font-family: 'Cairo', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+
+    .sp-link-row {
+      display: flex; align-items: center; gap: 12px; padding: 13px 4px;
+      border-top: 1px solid var(--border); cursor: pointer; transition: opacity .15s; background: none; border-left: none; border-right: none; border-bottom: none; width: 100%; text-align: right; color: var(--text);
+      font-family: 'Cairo', sans-serif; font-size: 14px;
+    }
+    .sp-link-row:hover { opacity: .75; }
+    .sp-link-row .sp-link-ico { font-size: 17px; width: 22px; text-align: center; flex-shrink: 0; }
+    .sp-link-row .sp-link-label { flex: 1; font-weight: 600; }
+    .sp-link-row .sp-link-chev { color: var(--text-muted); font-size: 12px; }
+    .sp-link-row.danger { color: var(--red); }
+
+    .sp-links-group { border-top: 1px solid var(--border); margin-top: 4px; display: flex; flex-direction: column; }
+
+    /* dropdown for supervisors */
+    .sp-dropdown { display: flex; flex-direction: column; }
+    .sp-dropdown-list { display: flex; flex-direction: column; max-height: 0; overflow: hidden; transition: max-height .25s; }
+    .sp-dropdown.open .sp-dropdown-list { max-height: 200px; }
+    .sp-dropdown-item {
+      display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 30px;
+      cursor: pointer; font-size: 13px; color: var(--text-sub); background: none; border: none;
+      font-family: 'Cairo', sans-serif; width: 100%; text-align: right;
+    }
+    .sp-dropdown-item:hover { color: var(--teal); }
+    .sp-dropdown .sp-link-chev { transition: transform .25s; }
+    .sp-dropdown.open .sp-link-chev { transform: rotate(180deg); }
+
+    /* ══════════════════════════════════════════
+       AUTH MODAL (login / signup / otp / password)
+    ══════════════════════════════════════════ */
+    .auth-step { display: flex; flex-direction: column; gap: 16px; }
+    .pw-field-wrap { position: relative; }
+    .pw-field-wrap .field-input { padding-left: 42px; }
+    .pw-eye {
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      cursor: pointer; color: var(--text-muted); font-size: 15px; user-select: none; background:none; border:none;
+    }
+    .pw-eye:hover { color: var(--text-sub); }
+    .auth-switch-line { text-align: center; font-size: 13px; color: var(--text-muted); }
+    .auth-switch-line a { color: var(--teal); font-weight: 700; cursor: pointer; text-decoration: none; }
+    .auth-forgot-line { text-align: left; font-size: 12px; }
+    .auth-forgot-line a { color: var(--text-muted); cursor: pointer; text-decoration: none; }
+    .auth-forgot-line a:hover { color: var(--teal); }
+    .otp-input {
+      text-align: center; font-size: 22px; font-weight: 800; letter-spacing: .35em; padding: 12px 13px !important;
+    }
+    .otp-hint { font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+    .otp-resend { text-align: center; font-size: 12px; }
+    .otp-resend a { color: var(--teal); cursor: pointer; font-weight: 700; text-decoration: none; }
+    .otp-resend a.disabled { color: var(--text-muted); cursor: default; pointer-events: none; }
+
+    /* ══════════════════════════════════════════
+       PROJECT CARD — new action row + 3-dot menu
+    ══════════════════════════════════════════ */
+    .card-options-btn {
+      position: absolute; top: 14px; left: 14px; z-index: 2;
+      width: 26px; height: 26px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.04); border: 1px solid transparent;
+      color: var(--text-muted); cursor: pointer; font-size: 14px; line-height: 1;
+      transition: background .15s, border-color .15s;
+    }
+    .card-options-btn:hover { background: var(--surface3); border-color: var(--border2); color: var(--text); }
+    .card-options-menu {
+      position: absolute; top: 44px; left: 14px; z-index: 5;
+      background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5); padding: 6px; min-width: 150px;
+      opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity .15s, transform .15s;
+    }
+    .card-options-menu.open { opacity: 1; transform: translateY(0); pointer-events: all; }
+    .card-options-menu button {
+      width: 100%; text-align: right; background: none; border: none; padding: 9px 10px;
+      font-family: 'Cairo', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--red);
+      cursor: pointer; border-radius: 7px; display: flex; align-items: center; gap: 7px;
+    }
+    .card-options-menu button:hover { background: rgba(248,113,113,0.1); }
+
+    /* ثابتة دائماً في أسفل الشريحة (margin-top:auto) بصرف النظر عن طول الوصف
+       — راجع flex:1 على عنصر المحتوى أعلاه في cardHTML() */
+    .card-actions-row { display: flex; align-items: center; gap: 8px; padding-top: 12px; margin-top: auto; border-top: 1px solid var(--border); }
+    .card-act-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+      background: transparent; border: none; border-radius: var(--radius-xs); padding: 10px 6px;
+      cursor: pointer; font-size: 13px; font-weight: 700; color: var(--text-muted);
+      font-family: 'Cairo', sans-serif; transition: background .15s, color .15s;
+    }
+    .card-act-btn:hover { background: var(--surface3); color: var(--text-sub); }
+    .card-act-btn.liked { color: var(--red); }
+    .card-act-btn .heart-ico { transition: transform .18s; font-size: 15px; }
+    .card-act-btn.liked .heart-ico { transform: scale(1.15); }
+    .card-act-btn .count { font-size: 12px; }
+
+    /* ══════════════════════════════════════════
+       COMMENTS MODAL
+    ══════════════════════════════════════════ */
+    .comments-list { display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto; padding-left: 2px; }
+    .comment-row { display: flex; gap: 10px; }
+    .comment-av { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg,var(--teal),var(--indigo)); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .comment-bubble { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 13px; flex: 1; }
+    .comment-author { font-size: 12.5px; font-weight: 700; margin-bottom: 2px; }
+    .comment-text { font-size: 13px; color: var(--text-sub); line-height: 1.6; word-break: break-word; }
+    .comment-time { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; }
+    .comments-empty { text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 13px; }
+    .comment-compose { display: flex; gap: 8px; align-items: flex-end; border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
+    .comment-compose textarea { flex: 1; min-height: 42px; max-height: 110px; }
+    .comment-send-btn {
+      width: 42px; height: 42px; border-radius: var(--radius-sm); border: none; flex-shrink: 0;
+      background: linear-gradient(135deg,var(--teal),#14B8A6); color: #0A0B10; font-size: 16px; cursor: pointer;
+    }
+    .comment-send-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    @media (max-width: 640px) {
+      .side-panel { width: 100%; max-width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -390,7 +621,12 @@
     <div class="logo-icon">🚀</div>
     <span class="logo-text">مشاريع الطلاب</span>
   </div>
-  <button class="fab" onclick="openAddModal()">إضافة مشروع</button>
+  <div class="header-actions">
+    <button class="fab" onclick="openAddModal()">إضافة مشروع</button>
+    <button class="account-btn" id="accountBtn" onclick="openSidePanel()" title="حسابي">
+      <span id="accountBtnIcon">👤</span>
+    </button>
+  </div>
 </header>
 
 <!-- HERO -->
@@ -534,7 +770,7 @@
       <!-- STEP 2: enter video URL -->
       <div class="url-step" id="urlStep" style="display:none">
         <div class="info-box">
-          ارفع الفيديو على <strong>Google Drive</strong> أو <strong>YouTube</strong> ثم الصق الرابط هنا.<br/>
+          ارفع فيديوك على <strong>Google Drive</strong> أو <strong>YouTube</strong> ثم الصق الرابط هنا.<br/>
           تأكد أن الفيديو مضبوط على <strong>"مشاركة مع أي شخص لديه الرابط"</strong>.
         </div>
         <div class="field-group">
@@ -560,7 +796,7 @@
     <div class="modal-head">
       <div class="modal-head-row">
         <h2>تعديل بيانات المشروع</h2>
-        <button class="modal-close" onclick="closeOverlayDirect('editOverlay')">✕</button>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
       </div>
       <p class="modal-sub" id="editModalSub"></p>
     </div>
@@ -611,52 +847,518 @@
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn-secondary" onclick="closeOverlayDirect('editOverlay')">إلغاء</button>
+      <button class="btn-secondary" onclick="closeEditModal()">إلغاء</button>
       <button class="btn-amber" id="editUidVerifyBtn" onclick="verifyEditUID()">التحقق من الرمز ←</button>
       <button class="btn-primary" id="editSaveBtn" onclick="submitEdit()" style="display:none">حفظ التعديلات ←</button>
     </div>
   </div>
 </div>
 
+<!-- ══════════ ADMIN LOGIN MODAL ══════════ -->
+<div class="overlay" id="adminLoginOverlay" onclick="closeOverlay('adminLoginOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>لوحة الإدارة</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('adminLoginOverlay')">✕</button>
+      </div>
+      <p class="modal-sub">سجّل دخولك كمدير للموقع</p>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label class="field-label">اسم المستخدم</label>
+        <input type="text" class="field-input" id="adminLoginUser" placeholder="اسم مستخدم المدير" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">كلمة السر</label>
+        <div class="pw-field-wrap">
+          <input type="password" class="field-input" id="adminLoginPw" placeholder="كلمة السر" autocomplete="off" />
+          <button type="button" class="pw-eye" onclick="togglePwVisibility('adminLoginPw',this)">👁️</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeOverlayDirect('adminLoginOverlay')">إلغاء</button>
+      <button class="btn-primary" id="adminLoginBtn" onclick="submitAdminLogin()">دخول لوحة الإدارة ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN PANEL ══════════ -->
+<div class="overlay" id="adminPanelOverlay" onclick="closeOverlay('adminPanelOverlay',event)">
+  <div class="admin-modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>🛠️ لوحة الإدارة</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('adminPanelOverlay')">✕</button>
+      </div>
+      <p class="modal-sub">تعديل أو حذف أي مشروع أو طالب على المنصة</p>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="projects" onclick="setAdminTab('projects')">📁 المشاريع</button>
+      <button class="admin-tab" data-tab="students" onclick="setAdminTab('students')">🎓 الطلاب</button>
+    </div>
+
+    <div class="admin-search-wrap">
+      <div class="search-box">
+        <span class="ico">🔍</span>
+        <input type="text" id="adminSearchInput" placeholder="ابحث بالاسم…" oninput="filterAdminList()" />
+      </div>
+    </div>
+
+    <div class="admin-add-row">
+      <button class="btn-secondary" id="adminAddStudentBtn" style="display:none;width:100%" onclick="openAdminStudentForm('add', null)">+ إضافة طالب جديد إلى الكشف</button>
+    </div>
+
+    <div class="admin-list" id="adminListArea"></div>
+
+    <div class="modal-foot" style="justify-content:center">
+      <button class="btn-secondary" style="width:100%" onclick="logoutAdmin()">🚪 تسجيل خروج المدير</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN: ADD/EDIT STUDENT MODAL ══════════ -->
+<div class="overlay" id="adminStudentFormOverlay" onclick="closeOverlay('adminStudentFormOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2 id="adminStudentFormTitle">إضافة طالب جديد</h2>
+        <button class="modal-close" onclick="closeAdminStudentForm()">✕</button>
+      </div>
+      <p class="modal-sub">بيانات الطالب في كشف الطلاب (Students)</p>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label class="field-label">الرقم الجامعي <span>(إلزامي)</span></label>
+        <input type="text" class="field-input" id="asfId" placeholder="مثال: 202312345" autocomplete="off" inputmode="numeric" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">اسم الطالب <span>(إلزامي)</span></label>
+        <input type="text" class="field-input" id="asfName" placeholder="الاسم الكامل" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">السنة الدراسية</label>
+        <input type="text" class="field-input" id="asfYear" placeholder="مثال: السنة الرابعة" autocomplete="off" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">اسم الأب</label>
+        <input type="text" class="field-input" id="asfFather" placeholder="يُستخدم لمطابقة اسم الطالب بمشروعه" autocomplete="off" />
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeAdminStudentForm()">إلغاء</button>
+      <button class="btn-primary" id="asfSaveBtn" onclick="submitAdminStudentForm()">حفظ ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN: GENERIC CONFIRM MODAL (حذف مشروع/طالب) ══════════ -->
+<div class="overlay" id="adminConfirmOverlay" onclick="closeOverlay('adminConfirmOverlay',event)">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2 id="adminConfirmTitle">تأكيد</h2>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="confirm-delete-box">
+        <p id="adminConfirmMsg"></p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeOverlayDirect('adminConfirmOverlay')">تراجع</button>
+      <button class="btn-danger" id="adminConfirmBtn" onclick="runAdminConfirm()">تأكيد الحذف</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- ══════════ SUCCESS MODAL ══════════ -->
 <div class="overlay" id="successOverlay">
   <div class="success-card">
     <div class="s-icon">🎉</div>
     <h3>تم نشر المشروع!</h3>
-    <p>ظهر مشروعك على اللوحة. احتفظ بالرمز لرفع الفيديو لاحقاً أو تعديل بياناتك.</p>
+    <p>ظهر مشروعك على اللوحة. احتفظ بالرمز لرفع الفيديو لاحقاً.</p>
     <div class="s-id" id="sId"></div>
-    <div class="s-warning">⚠️ احتفظ بهذا الرمز — ستحتاجه لرفع فيديو مشروعك أو تعديل بياناته</div>
+    <div class="s-warning">⚠️ احتفظ بهذا الرمز — ستحتاجه لرفع فيديو مشروعك</div>
     <button class="btn-done" onclick="closeOverlayDirect('successOverlay')">رائع، فهمت!</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- ══════════ SIDE PANEL (حسابي) ══════════ -->
+<div class="page-blur-overlay" id="sidePanelBlur" onclick="closeSidePanel()"></div>
+<aside class="side-panel" id="sidePanel">
+  <div class="side-panel-head">
+    <h2>حسابي</h2>
+    <button class="modal-close" onclick="closeSidePanel()">✕</button>
+  </div>
+  <div class="side-panel-body" id="sidePanelBody">
+    <!-- يُبنى محتواه ديناميكياً عبر JS (حالة تسجيل دخول/خروج) -->
+  </div>
+</aside>
+
+<!-- ══════════ AUTH MODAL: تسجيل الدخول / إنشاء حساب ══════════ -->
+<div class="overlay" id="authOverlay" onclick="closeOverlay('authOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2 id="authTitle">تسجيل الدخول</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('authOverlay')">✕</button>
+      </div>
+      <p class="modal-sub" id="authSub">أدخل رقمك الجامعي وكلمة السر</p>
+    </div>
+    <div class="modal-body">
+
+      <!-- ─── login step ─── -->
+      <div class="auth-step" id="authLoginStep">
+        <div class="field-group">
+          <label class="field-label">الرقم الجامعي</label>
+          <input type="text" class="field-input" id="loginUid" placeholder="مثال: 202312345" autocomplete="off" inputmode="numeric" />
+        </div>
+        <div class="field-group">
+          <label class="field-label">كلمة السر</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="loginPw" placeholder="كلمة السر" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('loginPw',this)">👁️</button>
+          </div>
+        </div>
+        <div class="auth-forgot-line"><a onclick="goToForgotPassword()">نسيت كلمة السر؟</a></div>
+        <div class="auth-switch-line">ليس لديك حساب؟ <a onclick="goToSignupStart()">إنشاء حساب جديد</a></div>
+      </div>
+
+      <!-- ─── signup: step 1 — university id ─── -->
+      <div class="auth-step" id="authSignupIdStep" style="display:none">
+        <div class="field-group">
+          <label class="field-label">الرقم الجامعي</label>
+          <input type="text" class="field-input" id="signupUid" placeholder="مثال: 202312345" autocomplete="off" inputmode="numeric" />
+        </div>
+        <div class="info-box">سيتم التحقق من رقمك الجامعي من كشف الطلاب أولاً.</div>
+        <div class="auth-switch-line">لديك حساب مسبقاً؟ <a onclick="goToLogin()">تسجيل الدخول</a></div>
+      </div>
+
+      <!-- ─── signup: step 2 — password + confirm + email ─── -->
+      <div class="auth-step" id="authSignupFormStep" style="display:none">
+        <div class="info-box" id="signupGreeting"></div>
+        <div class="field-group">
+          <label class="field-label">كلمة السر</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="signupPw" placeholder="6 أحرف على الأقل" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('signupPw',this)">👁️</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">تأكيد كلمة السر</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="signupPwConfirm" placeholder="أعد كتابة كلمة السر" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('signupPwConfirm',this)">👁️</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">البريد الإلكتروني <span>(لاستعادة كلمة السر لاحقاً)</span></label>
+          <input type="email" class="field-input" id="signupEmail" placeholder="example@email.com" autocomplete="off" style="direction:ltr;text-align:right" />
+        </div>
+      </div>
+
+      <!-- ─── otp step (مشترك: signup / reset / change) ─── -->
+      <div class="auth-step" id="authOtpStep" style="display:none">
+        <div class="otp-hint" id="otpHintText"></div>
+        <div class="field-group">
+          <label class="field-label" style="text-align:center;display:block">رمز التحقق</label>
+          <input type="text" class="field-input otp-input" id="otpCode" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div class="otp-resend">لم يصلك الرمز؟ <a id="resendOtpLink" onclick="resendCurrentOtp()">إعادة الإرسال</a></div>
+      </div>
+
+      <!-- ─── forgot password: enter id ─── -->
+      <div class="auth-step" id="authForgotIdStep" style="display:none">
+        <div class="field-group">
+          <label class="field-label">الرقم الجامعي</label>
+          <input type="text" class="field-input" id="forgotUid" placeholder="مثال: 202312345" autocomplete="off" inputmode="numeric" />
+        </div>
+        <div class="info-box">سنرسل رمز تحقق إلى البريد الإلكتروني المسجَّل على حسابك.</div>
+        <div class="auth-switch-line"><a onclick="goToLogin()">رجوع لتسجيل الدخول</a></div>
+      </div>
+
+      <!-- ─── forgot password: new password after otp ─── -->
+      <div class="auth-step" id="authNewPwStep" style="display:none">
+        <div class="field-group">
+          <label class="field-label">كلمة السر الجديدة</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="newPw1" placeholder="6 أحرف على الأقل" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('newPw1',this)">👁️</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">تأكيد كلمة السر الجديدة</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="newPw2" placeholder="أعد كتابة كلمة السر" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('newPw2',this)">👁️</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot" id="authFoot">
+      <!-- أزرار ديناميكية بحسب الخطوة -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CHANGE PASSWORD MODAL (من داخل الحساب) ══════════ -->
+<div class="overlay" id="changePwOverlay" onclick="closeOverlay('changePwOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2 id="changePwTitle">تغيير كلمة السر</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('changePwOverlay')">✕</button>
+      </div>
+      <p class="modal-sub">حدّث كلمة سر حسابك</p>
+    </div>
+    <div class="modal-body">
+
+      <!-- الطريقة العادية: كلمة السر القديمة + الجديدة -->
+      <div class="auth-step" id="cpNormalStep">
+        <div class="field-group">
+          <label class="field-label">كلمة السر الحالية</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="cpOld" placeholder="كلمة السر الحالية" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('cpOld',this)">👁️</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">كلمة السر الجديدة</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="cpNew" placeholder="6 أحرف على الأقل" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('cpNew',this)">👁️</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">تأكيد كلمة السر الجديدة</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="cpNew2" placeholder="أعد كتابة كلمة السر" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('cpNew2',this)">👁️</button>
+          </div>
+        </div>
+        <div class="auth-switch-line">نسيت كلمة السر الحالية؟ <a onclick="cpGoToOtpFlow()">تغييرها عبر البريد الإلكتروني</a></div>
+      </div>
+
+      <!-- طريقة OTP: إرسال رمز ثم كلمة سر جديدة -->
+      <div class="auth-step" id="cpOtpRequestStep" style="display:none">
+        <div class="info-box">سنرسل رمز تحقق إلى بريدك الإلكتروني المسجَّل لتأكيد هويتك.</div>
+        <div class="auth-switch-line"><a onclick="cpGoToNormal()">رجوع</a></div>
+      </div>
+
+      <div class="auth-step" id="cpOtpEnterStep" style="display:none">
+        <div class="otp-hint" id="cpOtpHintText"></div>
+        <div class="field-group">
+          <label class="field-label" style="text-align:center;display:block">رمز التحقق</label>
+          <input type="text" class="field-input otp-input" id="cpOtpCode" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div class="otp-resend">لم يصلك الرمز؟ <a id="cpResendOtpLink" onclick="cpResendOtp()">إعادة الإرسال</a></div>
+      </div>
+
+      <div class="auth-step" id="cpOtpNewPwStep" style="display:none">
+        <div class="field-group">
+          <label class="field-label">كلمة السر الجديدة</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="cpOtpNewPw1" placeholder="6 أحرف على الأقل" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('cpOtpNewPw1',this)">👁️</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">تأكيد كلمة السر الجديدة</label>
+          <div class="pw-field-wrap">
+            <input type="password" class="field-input" id="cpOtpNewPw2" placeholder="أعد كتابة كلمة السر" autocomplete="off" />
+            <button type="button" class="pw-eye" onclick="togglePwVisibility('cpOtpNewPw2',this)">👁️</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-foot" id="changePwFoot"></div>
+  </div>
+</div>
+
+<!-- ══════════ GET PROJECT CODE MODAL ══════════ -->
+<div class="overlay" id="getCodeOverlay" onclick="closeOverlay('getCodeOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>الحصول على رمز المشروع</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('getCodeOverlay')">✕</button>
+      </div>
+      <p class="modal-sub" id="gcSub">استرجع رمز مشروعك عبر بريدك الإلكتروني المسجَّل</p>
+    </div>
+    <div class="modal-body">
+
+      <!-- STEP 1: طلب إرسال الرمز -->
+      <div class="auth-step" id="gcRequestStep">
+        <div class="info-box">
+          سنرسل رمز تحقق إلى بريدك الإلكتروني المسجَّل لتأكيد هويتك، وبعدها سنعرض لك رمز مشروعك مباشرة.
+        </div>
+      </div>
+
+      <!-- STEP 2: إدخال رمز التحقق -->
+      <div class="auth-step" id="gcOtpStep" style="display:none">
+        <div class="otp-hint" id="gcOtpHintText"></div>
+        <div class="field-group">
+          <label class="field-label" style="text-align:center;display:block">رمز التحقق</label>
+          <input type="text" class="field-input otp-input" id="gcOtpCode" placeholder="••••••" maxlength="6" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div class="otp-resend">لم يصلك الرمز؟ <a id="gcResendOtpLink" onclick="gcResendOtp()">إعادة الإرسال</a></div>
+      </div>
+
+      <!-- STEP 3: عرض رمز المشروع -->
+      <div class="auth-step" id="gcResultStep" style="display:none">
+        <div class="info-box" style="text-align:center">
+          رمز مشروع «<strong id="gcResultProjectName"></strong>» هو:
+        </div>
+        <div style="text-align:center">
+          <div class="s-id" id="gcResultCode" style="cursor:pointer" onclick="copyProjectCode()" title="اضغط للنسخ"></div>
+        </div>
+        <div class="s-warning">⚠️ احتفظ بهذا الرمز — تحتاجه لرفع فيديو مشروعك أو تعديله لاحقاً</div>
+      </div>
+
+    </div>
+    <div class="modal-foot" id="getCodeFoot"></div>
+  </div>
+</div>
+
+<!-- ══════════ COMMENTS MODAL ══════════ -->
+<div class="overlay" id="commentsOverlay" onclick="closeOverlay('commentsOverlay',event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-head-row">
+        <h2>التعليقات</h2>
+        <button class="modal-close" onclick="closeOverlayDirect('commentsOverlay')">✕</button>
+      </div>
+      <p class="modal-sub" id="commentsModalSub"></p>
+    </div>
+    <div class="modal-body">
+      <div class="comments-list" id="commentsList"></div>
+      <div class="comment-compose" id="commentComposeWrap">
+        <textarea class="field-textarea" id="commentInput" placeholder="اكتب تعليقك..." maxlength="500" style="min-height:42px"></textarea>
+        <button class="comment-send-btn" id="commentSendBtn" onclick="sendComment()">←</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ FIREBASE (تفاعل آني — لايكات وتعليقات) ══════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+
 <!-- ══════════ SCRIPT ══════════ -->
 <script>
+/* ─── FIREBASE CONFIG (تفاعل آني: لايكات + تعليقات) ─── */
+const firebaseConfig = {
+  apiKey: "AIzaSyC7uG-rDRZfnP5N4jvuK01UTZHDkwf6LII",
+  authDomain: "students-project-f64a1.firebaseapp.com",
+  databaseURL: "https://students-project-f64a1-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "students-project-f64a1",
+  storageBucket: "students-project-f64a1.firebasestorage.app",
+  messagingSenderId: "937871067692",
+  appId: "1:937871067692:web:2270ff050c9fae71135f89"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 /* ─── CONFIG ─── */
 const CFG = {
-  SPREADSHEET_ID:  '15zOV3fJaSyruWcGRo0WKy-h6HivjBR689CdvdZPWCfI',
+  SPREADSHEET_ID:  '1w2e7mTFFVhW0mEo0NEcpfNzfijmU10dkOdZQ52F3CT8',
   SHEET_NAME:      'Projects',
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxS9SxMjE3lmeFdvK-hcT2VhliWgs0s-0lWsrOljoIy7d3qSY4R_egTXuR9Xs9ji7AE/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbw-EaMInbe_hmWboaK1HUoO7QPNajGKSWFy_Q6XMnkqgdUqaWdpStXf7sCnQ4eBw4g7/exec',
   MAX_MEMBERS: 5,
   MIN_MEMBERS: 1,
+  SUPPORT_WHATSAPP: '963950087443',
+  SUPERVISORS: [
+    { name: 'د. سامح عطري', phone: '963980507771' },
+    { name: 'ماهر غزاوي',    phone: '963950087443' },
+    { name: 'شادي عنطوز',    phone: '963980430163' },
+  ],
+  SESSION_KEY: 'tp_session_v1', // مفتاح حفظ جلسة الدخول محلياً (بدون الحاجة لتسجيل الدخول بكل تحديث)
 };
 
 /* ─── STATE ─── */
 let allProjects  = [];
 let activeFilter = 'all';
-let uploadTargetUID = null;   // UID المشروع المراد رفع فيديو له
-let editTargetUID   = null;   // UID المشروع المراد تعديله/حذفه
+let uploadTargetUID = null;
+let editTargetUID   = null;
+
+// تفاعل (لايكات/تعليقات) — تُغذَّى آنياً من Firebase Realtime Database
+let likeCounts    = {};   // { projectUid: count }
+let myLikes       = {};   // { projectUid: true }
+let commentCounts = {};   // { projectUid: count }
+let likesTree     = {};   // آخر نسخة خام من شجرة اللايكات القادمة من Firebase
+let commentsTree  = {};   // آخر نسخة خام من شجرة التعليقات القادمة من Firebase
+let likeBusy      = {};   // قفل مؤقت لمنع نقرات متكررة سريعة على نفس المشروع
+
+// المستخدم الحالي (تُحفظ بياناته العامة محلياً للإبقاء على الجلسة بين التحديثات)
+let currentUser = null; // { universityId, name, year }
+
+// تدفّق المصادقة الحالي
+let authFlow = { mode: null, universityId: null, email: null, otpPurpose: null };
+let activeCommentsUID = null;
+let activeCommentsName = '';
+
+// لوحة الإدارة — جلسة المدير الحالية (تُحفظ في الذاكرة فقط، وتُطلب جلسة
+// جديدة عند كل تحديث للصفحة كإجراء أمان إضافي لحساس بهذه الصلاحيات)
+let currentAdmin = null; // { username, token }
+let adminActiveTab = 'projects'; // 'projects' | 'students'
+let adminStudents = []; // آخر نسخة محمَّلة من كشف الطلاب لعرضها في اللوحة
+let editAdminMode = false; // هل نافذة تعديل/حذف المشروع مفتوحة من سياق لوحة الإدارة؟
+let adminConfirmCallback = null; // الإجراء الذي يُنفَّذ عند تأكيد نافذة التأكيد العامة
+let adminStudentFormMode = 'add'; // 'add' | 'edit'
 
 /* ── BOOT ── */
 document.addEventListener('DOMContentLoaded', () => {
   buildMemberSlots();
+  restoreSession();     // استعادة جلسة الدخول المحفوظة محلياً قبل أي شيء آخر
   loadProjects();
+  renderSidePanel();
+  initRealtimeListeners(); // تفعيل الاستماع الآني للايكات والتعليقات عبر Firebase
 
-  // preview video URL as user types
   document.getElementById('videoUrlInput').addEventListener('input', previewVideoURL);
+  document.getElementById('commentInput').addEventListener('input', e => {
+    document.getElementById('commentSendBtn').disabled = !e.target.value.trim();
+  });
+  document.getElementById('commentSendBtn').disabled = true;
+
+  // إغلاق أي قائمة خيارات (⋯) مفتوحة عند الضغط في أي مكان آخر
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.card-options-btn') && !e.target.closest('.card-options-menu')) {
+      document.querySelectorAll('.card-options-menu.open').forEach(m => m.classList.remove('open'));
+    }
+  });
 });
+
+/* ══════════════════════════════════════════
+   SESSION (تُحفظ محلياً عبر localStorage حتى لا يضطر
+   الطالب لتسجيل الدخول من جديد بعد كل تحديث للصفحة)
+══════════════════════════════════════════ */
+function restoreSession() {
+  try {
+    const raw = localStorage.getItem(CFG.SESSION_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved && saved.universityId) currentUser = saved;
+  } catch (e) {
+    // تجاهل أي خطأ في قراءة الجلسة المحفوظة (مثلاً وضع التصفح الخاص)
+  }
+}
+
+function saveSession() {
+  try {
+    if (currentUser) localStorage.setItem(CFG.SESSION_KEY, JSON.stringify(currentUser));
+    else localStorage.removeItem(CFG.SESSION_KEY);
+  } catch (e) {
+    // قد يفشل التخزين في بعض المتصفحات/الأوضاع الخاصة — لا داعي لإيقاف التطبيق
+  }
+}
 
 /* ══════════════════════════════════════════
    LOAD
@@ -761,21 +1463,45 @@ function cardHTML(p) {
   const badge    = p.status === 'completed'
     ? `<span class="status-badge completed">✅ مكتمل</span>`
     : `<span class="status-badge pending">⏳ قيد التنفيذ</span>`;
+
+  const likeCount = likeCounts[p.uid] || 0;
+  const isLiked   = !!myLikes[p.uid];
+  const commentCount = commentCounts[p.uid] || 0;
+
   return `
-    <div class="project-card" onclick="openDetail('${esc(p.uid)}')">
-      <div class="card-top">
-        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
-          <div class="card-seq">#${p.seq}</div>
-          ${badge}
-        </div>
-        <div class="card-date">${formatDate(p.date)}</div>
+    <div class="project-card" data-uid="${esc(p.uid)}">
+      <button class="card-options-btn" onclick="toggleCardMenu(event,'${esc(p.uid)}')" title="خيارات">⋯</button>
+      <div class="card-options-menu" id="menu-${esc(p.uid)}">
+        <button onclick="reportProject(event,'${esc(p.uid)}','${esc(p.seq)}')">🚩 إبلاغ عن مشروع</button>
       </div>
-      <div class="card-title">${esc(p.name)}</div>
-      ${p.desc ? `<div class="card-desc-preview">${esc(p.desc)}</div>` : ''}
-      <div class="members-row">${chips}${moreChip}</div>
-      <div class="card-footer">
-        <div class="members-count"><span class="dot"></span>${p.members.length} ${p.members.length===1?'طالب':'طلاب'}</div>
-        <span class="view-link">عرض التفاصيل ←</span>
+      <div onclick="openDetail('${esc(p.uid)}')" style="display:flex;flex-direction:column;gap:13px;cursor:pointer;flex:1;">
+        <div class="card-top">
+          <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding-left:30px;">
+            <div class="card-seq">#${p.seq}</div>
+            ${badge}
+          </div>
+          <div class="card-date">${formatDate(p.date)}</div>
+        </div>
+        <div class="card-title">${esc(p.name)}</div>
+        ${p.desc ? `<div class="card-desc-preview">${esc(p.desc)}</div>` : ''}
+        <div class="members-row">${chips}${moreChip}</div>
+        <div class="card-footer">
+          <div class="members-count"><span class="dot"></span>${p.members.length} ${p.members.length===1?'طالب':'طلاب'}</div>
+          <span class="view-link">عرض التفاصيل ←</span>
+        </div>
+      </div>
+      <div class="card-actions-row">
+        <button class="card-act-btn ${isLiked?'liked':''}" id="like-${esc(p.uid)}" onclick="handleLikeClick(event,'${esc(p.uid)}')">
+          <span class="heart-ico">${isLiked?'❤️':'🤍'}</span>
+          <span class="count" id="likeCount-${esc(p.uid)}">${likeCount>0?likeCount:''}</span>
+        </button>
+        <button class="card-act-btn" onclick="openCommentsModal(event,'${esc(p.uid)}','${esc(p.name)}')">
+          <span>💬</span>
+          <span class="count" id="commentCount-${esc(p.uid)}">${commentCount>0?commentCount:''}</span>
+        </button>
+        <button class="card-act-btn" onclick="shareProject(event,'${esc(p.uid)}')">
+          <span>📤</span><span>مشاركة</span>
+        </button>
       </div>
     </div>`;
 }
@@ -916,22 +1642,45 @@ async function submitVideo() {
 /* ══════════════════════════════════════════
    EDIT / DELETE PROJECT MODAL
 ══════════════════════════════════════════ */
-function openEditModal(uid, name) {
+function openEditModal(uid, name, adminMode) {
   editTargetUID = uid;
+  editAdminMode = !!adminMode;
   document.getElementById('editModalSub').textContent = 'مشروع: ' + name;
 
-  // reset to step 1
   document.getElementById('editUidInput').value = '';
   document.getElementById('editUidInput').classList.remove('err');
-  document.getElementById('editUidStep').style.display  = 'block';
-  document.getElementById('editFormStep').style.display = 'none';
-  document.getElementById('editUidVerifyBtn').style.display = 'inline-flex';
-  document.getElementById('editSaveBtn').style.display      = 'none';
   hideDeleteConfirm();
+
+  if (editAdminMode) {
+    // المدير موثّق مسبقاً عبر لوحة الإدارة — تخطَّ خطوة إدخال رمز المشروع
+    // وانتقل مباشرة لنموذج التعديل، معبَّأً ببيانات المشروع الحالية
+    const p = allProjects.find(x => x.uid === uid);
+    document.getElementById('editUidStep').style.display  = 'none';
+    document.getElementById('editFormStep').style.display = 'block';
+    document.getElementById('editUidVerifyBtn').style.display = 'none';
+    document.getElementById('editSaveBtn').style.display      = 'inline-flex';
+    if (p) {
+      document.getElementById('editProjName').value = p.name;
+      document.getElementById('editProjDesc').value = p.desc;
+      buildEditMemberSlots(p.members);
+    }
+  } else {
+    document.getElementById('editUidStep').style.display  = 'block';
+    document.getElementById('editFormStep').style.display = 'none';
+    document.getElementById('editUidVerifyBtn').style.display = 'inline-flex';
+    document.getElementById('editSaveBtn').style.display      = 'none';
+  }
 
   closeOverlayDirect('detailOverlay');
   openOverlay('editOverlay');
-  setTimeout(() => document.getElementById('editUidInput').focus(), 280);
+  if (!editAdminMode) setTimeout(() => document.getElementById('editUidInput').focus(), 280);
+}
+
+// يُستخدم عند إغلاق نافذة التعديل/الحذف — إن كانت مفتوحة من سياق لوحة
+// الإدارة، يُعاد فتح لوحة الإدارة بدل تركها مغلقة بالكامل
+function closeEditModal() {
+  closeOverlayDirect('editOverlay');
+  if (editAdminMode) openOverlay('adminPanelOverlay');
 }
 
 function verifyEditUID() {
@@ -992,13 +1741,25 @@ async function submitEdit() {
   const btn = document.getElementById('editSaveBtn');
   btn.disabled = true; btn.textContent = 'جارٍ الحفظ…';
 
-  const params = new URLSearchParams({
-    action: 'editProject',
-    uid: editTargetUID,
-    name, desc,
+  const baseParams = {
+    uid: editTargetUID, name, desc,
     s1: members[0]||'', s2: members[1]||'', s3: members[2]||'', s4: members[3]||'', s5: members[4]||'',
-  });
-  fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+  };
+
+  if (editAdminMode) {
+    // لوحة الإدارة: طلب حقيقي يُنتظر رده، لأن الخادم قد يرفض العملية إن
+    // كانت جلسة المدير غير صالحة أو منتهية الصلاحية
+    const res = await callApi({ action:'adminEditProject', token: currentAdmin?.token, ...baseParams });
+    btn.disabled = false; btn.textContent = 'حفظ التعديلات ←';
+    if (res.status !== 'success') {
+      toast(res.message || 'تعذّر حفظ التعديلات','err');
+      if (/جلسة|مصرح/.test(res.message||'')) { currentAdmin=null; closeOverlayDirect('editOverlay'); openAdminLoginModal(); }
+      return;
+    }
+  } else {
+    const params = new URLSearchParams({ action:'editProject', ...baseParams });
+    fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+  }
 
   // تحديث محلي فوري
   const p = allProjects.find(x => x.uid === editTargetUID);
@@ -1008,6 +1769,8 @@ async function submitEdit() {
   applyFilters();
   closeOverlayDirect('editOverlay');
   toast('✅ تم حفظ التعديلات بنجاح','ok');
+
+  if (editAdminMode) { openOverlay('adminPanelOverlay'); renderAdminProjectsList(); }
 
   btn.disabled = false; btn.textContent = 'حفظ التعديلات ←';
 }
@@ -1025,8 +1788,18 @@ async function deleteProject() {
   const btn = document.getElementById('confirmDeleteBtn');
   btn.disabled = true; btn.textContent = 'جارٍ الحذف…';
 
-  const params = new URLSearchParams({ action: 'deleteProject', uid: editTargetUID });
-  fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+  if (editAdminMode) {
+    const res = await callApi({ action:'adminDeleteProject', token: currentAdmin?.token, uid: editTargetUID });
+    if (res.status !== 'success') {
+      toast(res.message || 'تعذّر حذف المشروع','err');
+      btn.disabled = false; btn.textContent = 'نعم، احذف نهائياً';
+      if (/جلسة|مصرح/.test(res.message||'')) { currentAdmin=null; closeOverlayDirect('editOverlay'); closeOverlayDirect('adminPanelOverlay'); openAdminLoginModal(); }
+      return;
+    }
+  } else {
+    const params = new URLSearchParams({ action: 'deleteProject', uid: editTargetUID });
+    fetch(CFG.APPS_SCRIPT_URL+'?'+params, {method:'GET',mode:'no-cors'}).catch(()=>{});
+  }
 
   // إزالة محلية فورية
   allProjects = allProjects.filter(x => x.uid !== editTargetUID);
@@ -1036,6 +1809,8 @@ async function deleteProject() {
   applyFilters();
   closeOverlayDirect('editOverlay');
   toast('🗑️ تم حذف المشروع نهائياً','ok');
+
+  if (editAdminMode) { openOverlay('adminPanelOverlay'); renderAdminProjectsList(); }
 
   btn.disabled = false; btn.textContent = 'نعم، احذف نهائياً';
 }
@@ -1140,7 +1915,12 @@ function animNum(id, target) {
 }
 
 function openOverlay(id)  { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
-function closeOverlayDirect(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+function closeOverlayDirect(id) {
+  document.getElementById(id).classList.remove('open');
+  if (!document.querySelector('.overlay.open') && !document.getElementById('sidePanel').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
 function closeOverlay(id,e) { if(e.target===document.getElementById(id)) closeOverlayDirect(id); }
 
 let toastT;
@@ -1159,8 +1939,1153 @@ function formatDate(raw) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key==='Escape') ['addOverlay','detailOverlay','uploadOverlay','editOverlay','successOverlay'].forEach(closeOverlayDirect);
+  if (e.key==='Escape') {
+    ['addOverlay','detailOverlay','uploadOverlay','editOverlay','successOverlay',
+     'authOverlay','changePwOverlay','getCodeOverlay','commentsOverlay',
+     'adminLoginOverlay','adminPanelOverlay','adminStudentFormOverlay','adminConfirmOverlay'].forEach(closeOverlayDirect);
+    closeSidePanel();
+  }
 });
+
+/* ══════════════════════════════════════════
+   HELPER: استدعاء الخادم وقراءة الرد الفعلي (JSON)
+   يُستخدم لكل عمليات المصادقة/التفاعل/التعليقات التي
+   تحتاج معرفة نتيجة حقيقية من الخادم — على عكس عمليات
+   المشاريع القديمة (fire-and-forget مع mode:'no-cors').
+   يتطلب نشر Apps Script Web App بصلاحية "Anyone" لتفعيل CORS.
+══════════════════════════════════════════ */
+async function callApi(params) {
+  const qs = new URLSearchParams(params);
+  try {
+    const res  = await fetch(CFG.APPS_SCRIPT_URL + '?' + qs, { method: 'GET' });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { status: 'error', message: 'تعذّر الاتصال بالخادم، تحقّق من اتصالك بالإنترنت' };
+  }
+}
+
+function avatarURL(seed) {
+  return 'https://api.dicebear.com/10.x/shapes/svg?seed=' + encodeURIComponent(seed || 'guest') + '&backgroundType=gradientLinear';
+}
+
+/* ══════════════════════════════════════════
+   SIDE PANEL (حسابي)
+══════════════════════════════════════════ */
+function openSidePanel() {
+  renderSidePanel();
+  document.getElementById('sidePanelBlur').classList.add('open');
+  document.getElementById('sidePanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidePanel() {
+  document.getElementById('sidePanelBlur').classList.remove('open');
+  document.getElementById('sidePanel').classList.remove('open');
+  if (!document.querySelector('.overlay.open')) document.body.style.overflow = '';
+}
+
+function renderSidePanel() {
+  const body = document.getElementById('sidePanelBody');
+  const iconSlot = document.getElementById('accountBtnIcon');
+
+  if (!currentUser) {
+    iconSlot.textContent = '👤';
+    document.getElementById('accountBtn').querySelector('img')?.remove();
+    body.innerHTML = `
+      <div class="sp-guest-card">
+        <div class="sp-guest-icon">👋</div>
+        <p>سجّل دخولك للتفاعل مع المشاريع، إضافة مشروعك الخاص، وكتابة التعليقات.</p>
+        <button class="sp-login-btn" onclick="closeSidePanel();goToLogin();openOverlay('authOverlay')">تسجيل الدخول</button>
+      </div>
+      <div class="sp-links-group">${supportAndSupervisorsRowsHTML()}</div>
+    `;
+    return;
+  }
+
+  // حالة تسجيل الدخول
+  const av = avatarURL(currentUser.universityId);
+  iconSlot.textContent = '';
+  let img = document.getElementById('accountBtn').querySelector('img');
+  if (!img) { img = document.createElement('img'); document.getElementById('accountBtn').appendChild(img); }
+  img.src = av;
+
+  const myProject = findMyProject();
+
+  const myProjectHTML = myProject ? `
+    <div class="sp-mini-card" onclick="closeSidePanel();openDetail('${esc(myProject.uid)}')">
+      <div class="sp-mini-title">${esc(myProject.name)}</div>
+      ${myProject.desc ? `<div class="sp-mini-desc">${esc(myProject.desc)}</div>` : ''}
+      <span class="status-badge ${myProject.status==='completed'?'completed':'pending'} sp-mini-badge">
+        ${myProject.status==='completed' ? '✅ مكتمل' : '⏳ قيد التنفيذ'}
+      </span>
+    </div>
+  ` : `
+    <div class="sp-empty-mini">
+      <p>لم تُضِف مشروعاً بعد</p>
+      <button class="sp-add-mini-btn" onclick="closeSidePanel();openAddModal()">إضافة مشروع</button>
+    </div>
+  `;
+
+  body.innerHTML = `
+    <div class="sp-profile">
+      <div class="sp-avatar"><img src="${av}" alt=""></div>
+      <div class="sp-profile-name">${esc(currentUser.name || currentUser.universityId)}</div>
+      <div class="sp-profile-meta">${esc(currentUser.universityId)}${currentUser.year ? `<span class="dot"></span>${esc(currentUser.year)}` : ''}</div>
+    </div>
+
+    <div class="sp-section">
+      <div class="sp-section-title">مشروعي</div>
+      ${myProjectHTML}
+    </div>
+
+    <div class="sp-links-group">
+      <button class="sp-link-row" onclick="closeSidePanel();openChangePasswordModal()">
+        <span class="sp-link-ico">🔒</span><span class="sp-link-label">تغيير كلمة السر الخاصة بحسابي</span><span class="sp-link-chev">‹</span>
+      </button>
+      ${myProject ? `
+      <button class="sp-link-row" onclick="closeSidePanel();openGetProjectCodeModal()">
+        <span class="sp-link-ico">🔑</span><span class="sp-link-label">الحصول على رمز المشروع الخاص بي</span><span class="sp-link-chev">‹</span>
+      </button>
+      ` : ''}
+      ${supportAndSupervisorsRowsHTML()}
+      <button class="sp-link-row danger" onclick="logoutUser()">
+        <span class="sp-link-ico">🚪</span><span class="sp-link-label">تسجيل الخروج</span>
+      </button>
+    </div>
+  `;
+}
+
+function supportAndSupervisorsRowsHTML() {
+  return `
+    <div class="sp-links-group">
+      <button class="sp-link-row" onclick="window.open('https://wa.me/${CFG.SUPPORT_WHATSAPP}','_blank')">
+        <span class="sp-link-ico">🛠️</span><span class="sp-link-label">الدعم الفني</span><span class="sp-link-chev">‹</span>
+      </button>
+      <div class="sp-dropdown" id="supervisorsDropdown">
+        <button class="sp-link-row" onclick="toggleSupervisorsDropdown()">
+          <span class="sp-link-ico">🔐</span><span class="sp-link-label">المشرفون</span><span class="sp-link-chev">‹</span>
+        </button>
+        <div class="sp-dropdown-list">
+          ${CFG.SUPERVISORS.map(s => `
+            <button class="sp-dropdown-item" onclick="window.open('https://wa.me/${s.phone}','_blank')">
+              💬 ${esc(s.name)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+      <button class="sp-link-row" onclick="closeSidePanel();openAdminEntry()">
+        <span class="sp-link-ico">🛠️</span><span class="sp-link-label">لوحة الإدارة</span><span class="sp-link-chev">‹</span>
+      </button>
+    </div>
+  `;
+}
+
+function toggleSupervisorsDropdown() {
+  document.getElementById('supervisorsDropdown').classList.toggle('open');
+}
+
+/* ══════════════════════════════════════════
+   لوحة الإدارة — تسجيل الدخول وإدارة الجلسة
+══════════════════════════════════════════ */
+
+// زر "لوحة الإدارة" في القائمة الجانبية: إن كانت هناك جلسة مدير سارية في
+// هذه الزيارة، افتح اللوحة مباشرة، وإلا اطلب تسجيل الدخول أولاً
+function openAdminEntry() {
+  if (currentAdmin && currentAdmin.token) openAdminPanel();
+  else openAdminLoginModal();
+}
+
+function openAdminLoginModal() {
+  document.getElementById('adminLoginUser').value = '';
+  document.getElementById('adminLoginPw').value = '';
+  document.getElementById('adminLoginUser').classList.remove('err');
+  document.getElementById('adminLoginPw').classList.remove('err');
+  openOverlay('adminLoginOverlay');
+  setTimeout(() => document.getElementById('adminLoginUser').focus(), 280);
+}
+
+async function submitAdminLogin() {
+  const username = document.getElementById('adminLoginUser').value.trim();
+  const password = document.getElementById('adminLoginPw').value;
+
+  let ok = true;
+  const check = (id, val) => { const el=document.getElementById(id); if(!val){el.classList.add('err');ok=false;}else el.classList.remove('err'); };
+  check('adminLoginUser', username);
+  check('adminLoginPw', password);
+  if (!ok) { toast('أدخل اسم المستخدم وكلمة السر','err'); return; }
+
+  const btn = document.getElementById('adminLoginBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ التحقق…';
+  const res = await callApi({ action:'adminLogin', username, password });
+  btn.disabled = false; btn.textContent = 'دخول لوحة الإدارة ←';
+
+  if (res.status !== 'success') { toast(res.message || 'بيانات الدخول غير صحيحة','err'); return; }
+
+  currentAdmin = { username: res.username, token: res.token };
+  closeOverlayDirect('adminLoginOverlay');
+  toast('مرحباً ' + res.username + ' 🛠️','ok');
+  openAdminPanel();
+}
+
+function logoutAdmin() {
+  callApi({ action:'adminLogout', token: currentAdmin?.token }).catch(()=>{});
+  currentAdmin = null;
+  closeOverlayDirect('adminPanelOverlay');
+  toast('تم تسجيل خروج المدير','ok');
+}
+
+function openAdminPanel() {
+  adminActiveTab = 'projects';
+  document.getElementById('adminSearchInput').value = '';
+  setAdminTab('projects');
+  openOverlay('adminPanelOverlay');
+}
+
+function setAdminTab(tab) {
+  adminActiveTab = tab;
+  document.querySelectorAll('.admin-tab').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('adminAddStudentBtn').style.display = tab==='students' ? 'inline-flex' : 'none';
+  if (tab === 'projects') {
+    renderAdminProjectsList();
+  } else {
+    document.getElementById('adminListArea').innerHTML = '<div class="admin-empty">جارٍ التحميل…</div>';
+    loadAdminStudents();
+  }
+}
+
+function filterAdminList() {
+  if (adminActiveTab === 'projects') renderAdminProjectsList();
+  else renderAdminStudentsList();
+}
+
+/* ── المشاريع داخل لوحة الإدارة (تُقرأ من allProjects المحمَّلة مسبقاً) ── */
+function renderAdminProjectsList() {
+  const q = (document.getElementById('adminSearchInput').value || '').trim().toLowerCase();
+  const list = !q ? allProjects : allProjects.filter(p =>
+    p.name.toLowerCase().includes(q) || p.members.some(m => m.toLowerCase().includes(q)));
+
+  const area = document.getElementById('adminListArea');
+  if (!list.length) { area.innerHTML = '<div class="admin-empty">لا توجد مشاريع مطابقة</div>'; return; }
+
+  area.innerHTML = list.map(p => `
+    <div class="admin-row">
+      <div class="admin-row-main">
+        <div class="admin-row-title">${esc(p.name)}</div>
+        <div class="admin-row-sub">${esc(p.members.join('، '))}</div>
+      </div>
+      <div class="admin-row-actions">
+        <button class="admin-icon-btn" title="تعديل" onclick="openAdminEditProject('${esc(p.uid)}')">✏️</button>
+        <button class="admin-icon-btn danger" title="حذف" onclick="confirmAdminDeleteProjectRow('${esc(p.uid)}','${esc(p.name)}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAdminEditProject(uid) {
+  const p = allProjects.find(x => x.uid === uid);
+  if (!p) return;
+  closeOverlayDirect('adminPanelOverlay');
+  openEditModal(uid, p.name, true);
+}
+
+function confirmAdminDeleteProjectRow(uid, name) {
+  openAdminConfirm(
+    'حذف المشروع',
+    `سيتم حذف مشروع "${name}" وكل بياناته نهائياً من اللوحة والجدول. هل أنت متأكد؟`,
+    async () => { editTargetUID = uid; editAdminMode = true; await deleteProject(); }
+  );
+}
+
+/* ── الطلاب داخل لوحة الإدارة (تُقرأ عبر adminListStudents من الخادم) ── */
+async function loadAdminStudents() {
+  const res = await callApi({ action:'adminListStudents', token: currentAdmin?.token });
+  if (res.status !== 'success') {
+    toast(res.message || 'تعذّر تحميل قائمة الطلاب','err');
+    if (/جلسة|مصرح/.test(res.message||'')) { currentAdmin=null; closeOverlayDirect('adminPanelOverlay'); openAdminLoginModal(); return; }
+    document.getElementById('adminListArea').innerHTML = '<div class="admin-empty">تعذّر تحميل البيانات</div>';
+    return;
+  }
+  adminStudents = res.students || [];
+  renderAdminStudentsList();
+}
+
+function renderAdminStudentsList() {
+  const q = (document.getElementById('adminSearchInput').value || '').trim().toLowerCase();
+  const list = !q ? adminStudents : adminStudents.filter(s =>
+    s.universityId.toLowerCase().includes(q) || (s.name||'').toLowerCase().includes(q));
+
+  const area = document.getElementById('adminListArea');
+  if (!list.length) { area.innerHTML = '<div class="admin-empty">لا يوجد طلاب مطابقون</div>'; return; }
+
+  area.innerHTML = list.map(s => `
+    <div class="admin-row">
+      <div class="admin-row-main">
+        <div class="admin-row-title">${esc(s.name || 'بدون اسم')}</div>
+        <div class="admin-row-sub">${esc(s.universityId)}${s.year ? ' · ' + esc(s.year) : ''}</div>
+      </div>
+      <div class="admin-row-actions">
+        <button class="admin-icon-btn" title="تعديل" onclick="openAdminStudentFormById('${esc(s.universityId)}')">✏️</button>
+        <button class="admin-icon-btn danger" title="حذف" onclick="confirmAdminDeleteStudentRow('${esc(s.universityId)}','${esc(s.name)}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAdminStudentFormById(universityId) {
+  const s = adminStudents.find(x => x.universityId === universityId);
+  if (s) openAdminStudentForm('edit', s);
+}
+
+function openAdminStudentForm(mode, student) {
+  adminStudentFormMode = mode;
+
+  document.getElementById('adminStudentFormTitle').textContent = mode==='edit' ? 'تعديل بيانات طالب' : 'إضافة طالب جديد';
+  document.getElementById('asfId').value = student ? student.universityId : '';
+  document.getElementById('asfId').disabled = mode === 'edit'; // الرقم الجامعي ثابت أثناء التعديل (هو مفتاح التطابق)
+  document.getElementById('asfName').value = student ? (student.name || '') : '';
+  document.getElementById('asfYear').value = student ? (student.year || '') : '';
+  document.getElementById('asfFather').value = student ? (student.fatherName || '') : '';
+  ['asfId','asfName','asfYear','asfFather'].forEach(id => document.getElementById(id).classList.remove('err'));
+
+  closeOverlayDirect('adminPanelOverlay');
+  openOverlay('adminStudentFormOverlay');
+}
+
+function closeAdminStudentForm() {
+  closeOverlayDirect('adminStudentFormOverlay');
+  document.getElementById('asfId').disabled = false;
+  openOverlay('adminPanelOverlay');
+}
+
+async function submitAdminStudentForm() {
+  const id     = document.getElementById('asfId').value.trim();
+  const name   = document.getElementById('asfName').value.trim();
+  const year   = document.getElementById('asfYear').value.trim();
+  const father = document.getElementById('asfFather').value.trim();
+
+  let ok = true;
+  const check = (elId, val) => { const el=document.getElementById(elId); if(!val){el.classList.add('err');ok=false;}else el.classList.remove('err'); };
+  check('asfId', id);
+  check('asfName', name);
+  if (!ok) { toast('الرقم الجامعي والاسم إلزاميان','err'); return; }
+
+  const btn = document.getElementById('asfSaveBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ الحفظ…';
+
+  const action = adminStudentFormMode === 'edit' ? 'adminEditStudent' : 'adminAddStudent';
+  const res = await callApi({ action, token: currentAdmin?.token, universityId: id, name, year, fatherName: father });
+
+  btn.disabled = false; btn.textContent = 'حفظ ←';
+
+  if (res.status !== 'success') {
+    toast(res.message || 'تعذّر الحفظ','err');
+    if (/جلسة|مصرح/.test(res.message||'')) { currentAdmin=null; closeOverlayDirect('adminStudentFormOverlay'); openAdminLoginModal(); }
+    return;
+  }
+
+  toast(adminStudentFormMode==='edit' ? '✅ تم تحديث بيانات الطالب' : '✅ تمت إضافة الطالب','ok');
+  document.getElementById('asfId').disabled = false;
+  closeOverlayDirect('adminStudentFormOverlay');
+  openOverlay('adminPanelOverlay');
+  await loadAdminStudents();
+}
+
+function confirmAdminDeleteStudentRow(universityId, name) {
+  openAdminConfirm(
+    'حذف الطالب',
+    `سيتم حذف "${name || universityId}" (${universityId}) وحساب دخوله نهائياً، ولن يستطيع تسجيل الدخول بعد الآن. هل أنت متأكد؟`,
+    () => deleteStudentNow(universityId)
+  );
+}
+
+async function deleteStudentNow(universityId) {
+  const res = await callApi({ action:'adminDeleteStudent', token: currentAdmin?.token, universityId });
+  if (res.status !== 'success') {
+    toast(res.message || 'تعذّر حذف الطالب','err');
+    if (/جلسة|مصرح/.test(res.message||'')) { currentAdmin=null; closeOverlayDirect('adminPanelOverlay'); openAdminLoginModal(); }
+    return;
+  }
+  adminStudents = adminStudents.filter(s => s.universityId !== universityId);
+  renderAdminStudentsList();
+  toast('🗑️ تم حذف الطالب','ok');
+}
+
+/* ── نافذة تأكيد عامة (تُستخدم لحذف مشروع أو طالب من قائمة لوحة الإدارة) ── */
+function openAdminConfirm(title, message, onConfirm) {
+  document.getElementById('adminConfirmTitle').textContent = title;
+  document.getElementById('adminConfirmMsg').textContent = message;
+  adminConfirmCallback = onConfirm;
+  openOverlay('adminConfirmOverlay');
+}
+
+async function runAdminConfirm() {
+  const btn = document.getElementById('adminConfirmBtn');
+  btn.disabled = true; btn.textContent = 'جارٍ التنفيذ…';
+  if (adminConfirmCallback) { await adminConfirmCallback(); adminConfirmCallback = null; }
+  btn.disabled = false; btn.textContent = 'تأكيد الحذف';
+  closeOverlayDirect('adminConfirmOverlay');
+}
+
+/* ══════════════════════════════════════════
+   مطابقة أسماء الطلاب (تساهل إملائي عربي)
+   تُستخدم لإيجاد مشروع الطالب المسجّل دخوله ضمن أعضاء المشاريع (members)،
+   عبر مقارنته باسمه + اسم أبيه القادمَين من صفحة Students (العمود B لاسم
+   الطالب، والعمود D لاسم أبيه)، مع تجاوز فروقات الإملاء الشائعة كالهمزة
+   (أ إ آ ء)، والألف الممدودة، والهاء/التاء المربوطة، والألف المقصورة/الياء،
+   وعلامات الترقيم والمسافات الزائدة، وبغضّ النظر عن ترتيب الكلمات.
+══════════════════════════════════════════ */
+
+// توحيد الإملاء العربي لتسهيل المقارنة: حذف التشكيل والتطويل، توحيد أشكال
+// الهمزة على الألف/الواو/الياء إلى حروفها الأصلية، توحيد الهاء/التاء
+// المربوطة وكذلك الألف المقصورة/الياء، وحذف علامات الترقيم والمسافات الزائدة
+function normalizeArabic(str) {
+  return String(str || '')
+    .replace(/[\u064B-\u065F\u0610-\u061A\u06D6-\u06ED\u0670]/g, '') // التشكيل
+    .replace(/\u0640/g, '')               // التطويل (ـ)
+    .replace(/[أإآٱ]/g, 'ا')              // همزة/مدّ على الألف ← ألف
+    .replace(/ى/g, 'ي')                   // ألف مقصورة ← ياء
+    .replace(/ة/g, 'ه')                   // تاء مربوطة ← هاء
+    .replace(/ؤ/g, 'و')                   // همزة على الواو ← واو
+    .replace(/ئ/g, 'ي')                   // همزة على الياء ← ياء
+    .replace(/ء/g, '')                    // همزة مفردة ← حذف
+    .replace(/[.,،؛:؟!"'`\-_()\[\]]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+// تقسيم الاسم بعد التطبيع إلى كلمات (Tokens) لمقارنته بغضّ النظر عن الترتيب
+function nameTokens(str) {
+  return normalizeArabic(str).split(' ').filter(Boolean);
+}
+
+// توليد عدة احتمالات لاسم الطالب اعتماداً على (اسم الطالب من العمود B +
+// اسم أبيه من العمود D في صفحة Students)، لأن الطلاب قد يكتبون أسماءهم في
+// صفحة المشاريع بصيغ مختلفة (الاسم وحده، الاسم مع اسم الأب، بترتيب مختلف...)
+function buildNameCandidates(user) {
+  const studentName = String((user && user.name) || '').trim();
+  const fatherName   = String((user && user.fatherName) || '').trim();
+  const candidates = new Set();
+
+  if (studentName) candidates.add(studentName);
+  if (studentName && fatherName) {
+    candidates.add(studentName + ' ' + fatherName);   // اسم الطالب + اسم الأب
+    candidates.add(fatherName + ' ' + studentName);   // اسم الأب + اسم الطالب (تساهلاً بالترتيب)
+    const firstWord = studentName.split(/\s+/)[0];
+    if (firstWord && firstWord !== studentName) {
+      candidates.add(firstWord + ' ' + fatherName);   // الاسم الأول فقط + اسم الأب
+    }
+  }
+  return Array.from(candidates).filter(Boolean);
+}
+
+// تحديد ما إذا كان أحد احتمالات اسم الطالب (candidate) يطابق اسم عضو مذكور
+// في مشروع ما (memberStr) بشكل متساهل: تطابق تام بعد التطبيع، أو احتواء
+// كامل لكلمات أحدهما ضمن كلمات الآخر (لتقبّل أسماء إضافية كاسم العائلة)
+function namesLikelyMatch(candidate, memberStr) {
+  const cTokens = nameTokens(candidate);
+  const mTokens = nameTokens(memberStr);
+  if (!cTokens.length || !mTokens.length) return false;
+  if (cTokens.join(' ') === mTokens.join(' ')) return true;
+  if (Math.min(cTokens.length, mTokens.length) < 2) return false; // تجنّب التطابق الوهمي على كلمة واحدة شائعة
+  const cInM = cTokens.every(t => mTokens.includes(t));
+  const mInC = mTokens.every(t => cTokens.includes(t));
+  return cInM || mInC;
+}
+
+// إيجاد مشروع الطالب المسجّل دخوله ضمن allProjects عبر كل احتمالات اسمه
+function findMyProject() {
+  if (!currentUser) return null;
+  const candidates = buildNameCandidates(currentUser);
+  if (!candidates.length) return null;
+  return allProjects.find(p =>
+    p.members.some(m => candidates.some(c => namesLikelyMatch(c, m)))
+  ) || null;
+}
+
+function logoutUser() {
+  currentUser = null;
+  saveSession();
+  recomputeLikesFromTree();
+  renderSidePanel();
+  applyFilters();
+  toast('تم تسجيل الخروج','ok');
+}
+
+/* ══════════════════════════════════════════
+   AUTH FLOW — تسجيل الدخول / إنشاء حساب / استعادة كلمة السر
+══════════════════════════════════════════ */
+function setAuthStep(stepId) {
+  ['authLoginStep','authSignupIdStep','authSignupFormStep','authOtpStep','authForgotIdStep','authNewPwStep']
+    .forEach(id => document.getElementById(id).style.display = (id===stepId ? 'flex' : 'none'));
+}
+
+function goToLogin() {
+  authFlow = { mode:'login', universityId:null, email:null, otpPurpose:null };
+  document.getElementById('authTitle').textContent = 'تسجيل الدخول';
+  document.getElementById('authSub').textContent = 'أدخل رقمك الجامعي وكلمة السر';
+  document.getElementById('loginUid').value = '';
+  document.getElementById('loginPw').value = '';
+  setAuthStep('authLoginStep');
+  renderAuthFoot();
+}
+
+function goToSignupStart() {
+  authFlow = { mode:'signup', universityId:null, email:null, otpPurpose:null };
+  document.getElementById('authTitle').textContent = 'إنشاء حساب جديد';
+  document.getElementById('authSub').textContent = 'الخطوة 1 من 2 — التحقق من الرقم الجامعي';
+  document.getElementById('signupUid').value = '';
+  setAuthStep('authSignupIdStep');
+  renderAuthFoot();
+}
+
+function goToForgotPassword() {
+  authFlow = { mode:'forgot', universityId:null, email:null, otpPurpose:null };
+  document.getElementById('authTitle').textContent = 'استعادة كلمة السر';
+  document.getElementById('authSub').textContent = 'أدخل رقمك الجامعي لإرسال رمز التحقق';
+  document.getElementById('forgotUid').value = '';
+  setAuthStep('authForgotIdStep');
+  renderAuthFoot();
+}
+
+function togglePwVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.textContent = show ? '🙈' : '👁️';
+}
+
+function renderAuthFoot() {
+  const foot = document.getElementById('authFoot');
+  const step = authFlow.mode;
+  const otpStepVisible = document.getElementById('authOtpStep').style.display !== 'none';
+  const newPwStepVisible = document.getElementById('authNewPwStep').style.display !== 'none';
+
+  if (newPwStepVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="authSubmitBtn" onclick="submitNewPasswordAfterOtp()">تحديث كلمة السر ←</button>`;
+    return;
+  }
+  if (otpStepVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="authSubmitBtn" onclick="submitOtpStep()">تأكيد الرمز ←</button>`;
+    return;
+  }
+  if (step === 'login') {
+    foot.innerHTML = `<button class="btn-primary" id="authSubmitBtn" onclick="submitLogin()">تسجيل الدخول ←</button>`;
+  } else if (step === 'signup') {
+    const idStepVisible = document.getElementById('authSignupIdStep').style.display !== 'none';
+    foot.innerHTML = idStepVisible
+      ? `<button class="btn-primary" id="authSubmitBtn" onclick="submitSignupId()">التالي ←</button>`
+      : `<button class="btn-primary" id="authSubmitBtn" onclick="submitSignupForm()">إرسال رمز التحقق ←</button>`;
+  } else if (step === 'forgot') {
+    foot.innerHTML = `<button class="btn-primary" id="authSubmitBtn" onclick="submitForgotId()">إرسال رمز التحقق ←</button>`;
+  }
+}
+
+function setBtnLoading(loading, label) {
+  const btn = document.getElementById('authSubmitBtn');
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) { btn.dataset.orig = btn.textContent; btn.textContent = 'جارٍ التحميل…'; }
+  else if (btn.dataset.orig) btn.textContent = btn.dataset.orig;
+}
+
+async function submitLogin() {
+  const universityId = document.getElementById('loginUid').value.trim();
+  const password = document.getElementById('loginPw').value;
+  if (!universityId || !password) return toast('أدخل الرقم الجامعي وكلمة السر','err');
+
+  setBtnLoading(true);
+  const res = await callApi({ action:'login', universityId, password });
+  setBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  currentUser = { universityId: res.universityId || universityId, name: res.name || '', year: res.year || '', fatherName: res.fatherName || '' };
+  saveSession();
+  recomputeLikesFromTree();
+  closeOverlayDirect('authOverlay');
+  renderSidePanel();
+  applyFilters();
+  toast('مرحباً بك ' + (currentUser.name || '') + ' 👋','ok');
+  openSidePanel();
+}
+
+async function submitSignupId() {
+  const universityId = document.getElementById('signupUid').value.trim();
+  if (!universityId) return toast('أدخل الرقم الجامعي','err');
+
+  setBtnLoading(true);
+  const res = await callApi({ action:'checkStudent', universityId });
+  setBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+  if (res.exists) {
+    toast('يوجد حساب مسجَّل مسبقاً لهذا الرقم، يمكنك تسجيل الدخول مباشرة','err');
+    return goToLogin();
+  }
+
+  authFlow.universityId = universityId;
+  authFlow.studentName = res.name;
+  authFlow.studentFatherName = res.fatherName || '';
+  document.getElementById('authSub').textContent = 'الخطوة 2 من 2 — تعيين كلمة السر';
+  document.getElementById('signupGreeting').textContent = `أهلاً ${res.name || ''}! اختر كلمة سر لحسابك.`;
+  document.getElementById('signupPw').value = '';
+  document.getElementById('signupPwConfirm').value = '';
+  document.getElementById('signupEmail').value = '';
+  setAuthStep('authSignupFormStep');
+  renderAuthFoot();
+}
+
+async function submitSignupForm() {
+  const pw1 = document.getElementById('signupPw').value;
+  const pw2 = document.getElementById('signupPwConfirm').value;
+  const email = document.getElementById('signupEmail').value.trim();
+
+  if (pw1.length < 6) return toast('كلمة السر يجب أن تكون 6 أحرف على الأقل','err');
+  if (pw1 !== pw2) return toast('كلمتا السر غير متطابقتين','err');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return toast('صيغة البريد الإلكتروني غير صحيحة','err');
+
+  setBtnLoading(true);
+  const res = await callApi({ action:'sendSignupOtp', universityId: authFlow.universityId, email });
+  setBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  authFlow.email = email;
+  authFlow.otpPurpose = 'signup';
+  authFlow.pendingPassword = pw1;
+  showOtpStep('تم إرسال رمز التحقق إلى بريدك الإلكتروني، أدخله أدناه لإكمال إنشاء الحساب.');
+}
+
+async function submitForgotId() {
+  const universityId = document.getElementById('forgotUid').value.trim();
+  if (!universityId) return toast('أدخل الرقم الجامعي','err');
+
+  setBtnLoading(true);
+  const res = await callApi({ action:'sendResetOtp', universityId });
+  setBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  authFlow.universityId = universityId;
+  authFlow.otpPurpose = 'reset';
+  showOtpStep('تم إرسال رمز التحقق إلى بريدك المسجَّل' + (res.maskedEmail ? ' (' + res.maskedEmail + ')' : '') + '.');
+}
+
+function showOtpStep(hintText) {
+  document.getElementById('otpHintText').textContent = hintText;
+  document.getElementById('otpCode').value = '';
+  setAuthStep('authOtpStep');
+  renderAuthFoot();
+  startOtpResendCooldown('resendOtpLink');
+}
+
+let otpCooldownTimer = null;
+function startOtpResendCooldown(linkId, seconds = 30) {
+  const link = document.getElementById(linkId);
+  let remaining = seconds;
+  link.classList.add('disabled');
+  link.textContent = `إعادة الإرسال (${remaining})`;
+  clearInterval(otpCooldownTimer);
+  otpCooldownTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      clearInterval(otpCooldownTimer);
+      link.classList.remove('disabled');
+      link.textContent = 'إعادة الإرسال';
+    } else {
+      link.textContent = `إعادة الإرسال (${remaining})`;
+    }
+  }, 1000);
+}
+
+async function resendCurrentOtp() {
+  if (document.getElementById('resendOtpLink').classList.contains('disabled')) return;
+  let res;
+  if (authFlow.otpPurpose === 'signup') {
+    res = await callApi({ action:'sendSignupOtp', universityId: authFlow.universityId, email: authFlow.email });
+  } else if (authFlow.otpPurpose === 'reset') {
+    res = await callApi({ action:'sendResetOtp', universityId: authFlow.universityId });
+  }
+  if (res && res.status === 'success') {
+    toast('تم إعادة إرسال الرمز','ok');
+    startOtpResendCooldown('resendOtpLink');
+  } else {
+    toast((res && res.message) || 'تعذّر إعادة الإرسال','err');
+  }
+}
+
+async function submitOtpStep() {
+  const code = document.getElementById('otpCode').value.trim();
+  if (!code || code.length !== 6) return toast('أدخل رمز التحقق المكوّن من 6 أرقام','err');
+
+  setBtnLoading(true);
+
+  if (authFlow.otpPurpose === 'signup') {
+    const res = await callApi({
+      action: 'verifySignupOtp',
+      universityId: authFlow.universityId,
+      code,
+      password: authFlow.pendingPassword,
+    });
+    setBtnLoading(false);
+    if (res.status !== 'success') return toast(res.message || 'رمز غير صحيح','err');
+
+    currentUser = { universityId: authFlow.universityId, name: res.name || authFlow.studentName || '', year: res.year || '', fatherName: res.fatherName || authFlow.studentFatherName || '' };
+    saveSession();
+    recomputeLikesFromTree();
+    closeOverlayDirect('authOverlay');
+    renderSidePanel();
+    applyFilters();
+    toast('تم إنشاء حسابك بنجاح، أهلاً بك ' + (currentUser.name||'') + ' 🎉','ok');
+    openSidePanel();
+    return;
+  }
+
+  if (authFlow.otpPurpose === 'reset') {
+    authFlow.verifiedResetCode = code; // سنحتاجه عند إرسال كلمة السر الجديدة
+    setBtnLoading(false);
+    document.getElementById('newPw1').value = '';
+    document.getElementById('newPw2').value = '';
+    setAuthStep('authNewPwStep');
+    document.getElementById('authSub').textContent = 'أدخل كلمة السر الجديدة';
+    renderAuthFoot();
+  }
+}
+
+async function submitNewPasswordAfterOtp() {
+  const pw1 = document.getElementById('newPw1').value;
+  const pw2 = document.getElementById('newPw2').value;
+  if (pw1.length < 6) return toast('كلمة السر يجب أن تكون 6 أحرف على الأقل','err');
+  if (pw1 !== pw2) return toast('كلمتا السر غير متطابقتين','err');
+
+  setBtnLoading(true);
+  const res = await callApi({
+    action: 'verifyResetOtp',
+    universityId: authFlow.universityId,
+    code: authFlow.verifiedResetCode,
+    password: pw1,
+  });
+  setBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  toast('تم تحديث كلمة السر بنجاح، يمكنك تسجيل الدخول الآن','ok');
+  goToLogin();
+}
+
+/* ══════════════════════════════════════════
+   CHANGE PASSWORD (من داخل الحساب — طريقتان)
+══════════════════════════════════════════ */
+let cpFlow = { otpPurpose:'change', verifiedCode:null };
+
+function openChangePasswordModal() {
+  if (!currentUser) {
+    toast('سجّل دخولك أولاً','err');
+    goToLogin();
+    openOverlay('authOverlay');
+    return;
+  }
+  cpGoToNormal();
+  openOverlay('changePwOverlay');
+}
+
+function setCpStep(stepId) {
+  ['cpNormalStep','cpOtpRequestStep','cpOtpEnterStep','cpOtpNewPwStep']
+    .forEach(id => document.getElementById(id).style.display = (id===stepId ? 'flex' : 'none'));
+}
+
+function cpGoToNormal() {
+  document.getElementById('changePwTitle').textContent = 'تغيير كلمة السر';
+  document.getElementById('cpOld').value = '';
+  document.getElementById('cpNew').value = '';
+  document.getElementById('cpNew2').value = '';
+  setCpStep('cpNormalStep');
+  renderChangePwFoot();
+}
+
+function cpGoToOtpFlow() {
+  document.getElementById('changePwTitle').textContent = 'تغيير كلمة السر عبر البريد الإلكتروني';
+  setCpStep('cpOtpRequestStep');
+  renderChangePwFoot();
+}
+
+function renderChangePwFoot() {
+  const foot = document.getElementById('changePwFoot');
+  const normalVisible = document.getElementById('cpNormalStep').style.display !== 'none';
+  const otpReqVisible = document.getElementById('cpOtpRequestStep').style.display !== 'none';
+  const otpEnterVisible = document.getElementById('cpOtpEnterStep').style.display !== 'none';
+  const otpNewPwVisible = document.getElementById('cpOtpNewPwStep').style.display !== 'none';
+
+  if (normalVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="cpSubmitBtn" onclick="submitChangePasswordNormal()">تحديث كلمة السر ←</button>`;
+  } else if (otpReqVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="cpSubmitBtn" onclick="submitCpSendOtp()">إرسال رمز التحقق ←</button>`;
+  } else if (otpEnterVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="cpSubmitBtn" onclick="submitCpOtpCode()">تأكيد الرمز ←</button>`;
+  } else if (otpNewPwVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="cpSubmitBtn" onclick="submitCpNewPassword()">تحديث كلمة السر ←</button>`;
+  }
+}
+
+function setCpBtnLoading(loading) {
+  const btn = document.getElementById('cpSubmitBtn');
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) { btn.dataset.orig = btn.textContent; btn.textContent = 'جارٍ التحميل…'; }
+  else if (btn.dataset.orig) btn.textContent = btn.dataset.orig;
+}
+
+async function submitChangePasswordNormal() {
+  const oldPassword = document.getElementById('cpOld').value;
+  const newPassword = document.getElementById('cpNew').value;
+  const confirm = document.getElementById('cpNew2').value;
+  if (!oldPassword) return toast('أدخل كلمة السر الحالية','err');
+  if (newPassword.length < 6) return toast('كلمة السر الجديدة يجب أن تكون 6 أحرف على الأقل','err');
+  if (newPassword !== confirm) return toast('كلمتا السر غير متطابقتين','err');
+
+  setCpBtnLoading(true);
+  const res = await callApi({ action:'changePassword', universityId: currentUser.universityId, oldPassword, newPassword });
+  setCpBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+  toast('تم تحديث كلمة السر بنجاح','ok');
+  closeOverlayDirect('changePwOverlay');
+}
+
+async function submitCpSendOtp() {
+  setCpBtnLoading(true);
+  const res = await callApi({ action:'sendChangeOtp', universityId: currentUser.universityId });
+  setCpBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  document.getElementById('cpOtpHintText').textContent = 'تم إرسال رمز التحقق إلى بريدك المسجَّل' + (res.maskedEmail ? ' (' + res.maskedEmail + ')' : '') + '.';
+  document.getElementById('cpOtpCode').value = '';
+  setCpStep('cpOtpEnterStep');
+  renderChangePwFoot();
+  startOtpResendCooldown('cpResendOtpLink');
+}
+
+async function cpResendOtp() {
+  if (document.getElementById('cpResendOtpLink').classList.contains('disabled')) return;
+  const res = await callApi({ action:'sendChangeOtp', universityId: currentUser.universityId });
+  if (res.status === 'success') { toast('تم إعادة إرسال الرمز','ok'); startOtpResendCooldown('cpResendOtpLink'); }
+  else toast(res.message || 'تعذّر إعادة الإرسال','err');
+}
+
+async function submitCpOtpCode() {
+  const code = document.getElementById('cpOtpCode').value.trim();
+  if (!code || code.length !== 6) return toast('أدخل رمز التحقق المكوّن من 6 أرقام','err');
+  cpFlow.verifiedCode = code;
+  document.getElementById('cpOtpNewPw1').value = '';
+  document.getElementById('cpOtpNewPw2').value = '';
+  setCpStep('cpOtpNewPwStep');
+  renderChangePwFoot();
+}
+
+async function submitCpNewPassword() {
+  const pw1 = document.getElementById('cpOtpNewPw1').value;
+  const pw2 = document.getElementById('cpOtpNewPw2').value;
+  if (pw1.length < 6) return toast('كلمة السر يجب أن تكون 6 أحرف على الأقل','err');
+  if (pw1 !== pw2) return toast('كلمتا السر غير متطابقتين','err');
+
+  setCpBtnLoading(true);
+  const res = await callApi({ action:'verifyChangeOtp', universityId: currentUser.universityId, code: cpFlow.verifiedCode, password: pw1 });
+  setCpBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+  toast('تم تحديث كلمة السر بنجاح','ok');
+  closeOverlayDirect('changePwOverlay');
+}
+
+/* ══════════════════════════════════════════
+   GET PROJECT CODE (الحصول على رمز المشروع عبر OTP)
+   يظهر زر فتح هذه النافذة في الصفحة الجانبية فقط إذا عُثر على مشروع
+   مطابق لاسم المستخدم المسجِّل دخوله (انظر findMyProject أعلاه). عند
+   الضغط: نرسل رمز تحقق إلى بريده المسجَّل، وبعد تأكيده نعرض له رمز
+   مشروعه الفعلي (قيمة العمود A في صفحة Projects على الخادم).
+══════════════════════════════════════════ */
+function openGetProjectCodeModal() {
+  if (!currentUser) {
+    toast('سجّل دخولك أولاً','err');
+    goToLogin();
+    openOverlay('authOverlay');
+    return;
+  }
+  setGcStep('gcRequestStep');
+  renderGetCodeFoot();
+  openOverlay('getCodeOverlay');
+}
+
+function setGcStep(stepId) {
+  ['gcRequestStep','gcOtpStep','gcResultStep']
+    .forEach(id => document.getElementById(id).style.display = (id===stepId ? 'flex' : 'none'));
+}
+
+function renderGetCodeFoot() {
+  const foot = document.getElementById('getCodeFoot');
+  const reqVisible    = document.getElementById('gcRequestStep').style.display !== 'none';
+  const otpVisible    = document.getElementById('gcOtpStep').style.display !== 'none';
+  const resultVisible = document.getElementById('gcResultStep').style.display !== 'none';
+
+  if (reqVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="gcSubmitBtn" onclick="submitGcSendOtp()">إرسال رمز التحقق ←</button>`;
+  } else if (otpVisible) {
+    foot.innerHTML = `<button class="btn-primary" id="gcSubmitBtn" onclick="submitGcVerifyOtp()">تأكيد الرمز ←</button>`;
+  } else if (resultVisible) {
+    foot.innerHTML = `<button class="btn-done" style="width:100%" onclick="closeOverlayDirect('getCodeOverlay')">رائع، فهمت!</button>`;
+  }
+}
+
+function setGcBtnLoading(loading) {
+  const btn = document.getElementById('gcSubmitBtn');
+  if (!btn) return;
+  btn.disabled = loading;
+  if (loading) { btn.dataset.orig = btn.textContent; btn.textContent = 'جارٍ التحميل…'; }
+  else if (btn.dataset.orig) btn.textContent = btn.dataset.orig;
+}
+
+async function submitGcSendOtp() {
+  setGcBtnLoading(true);
+  const res = await callApi({ action:'sendProjectCodeOtp', universityId: currentUser.universityId });
+  setGcBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  document.getElementById('gcOtpHintText').textContent = 'تم إرسال رمز التحقق إلى بريدك المسجَّل' + (res.maskedEmail ? ' (' + res.maskedEmail + ')' : '') + '.';
+  document.getElementById('gcOtpCode').value = '';
+  setGcStep('gcOtpStep');
+  renderGetCodeFoot();
+  startOtpResendCooldown('gcResendOtpLink');
+}
+
+async function gcResendOtp() {
+  if (document.getElementById('gcResendOtpLink').classList.contains('disabled')) return;
+  const res = await callApi({ action:'sendProjectCodeOtp', universityId: currentUser.universityId });
+  if (res.status === 'success') { toast('تم إعادة إرسال الرمز','ok'); startOtpResendCooldown('gcResendOtpLink'); }
+  else toast(res.message || 'تعذّر إعادة الإرسال','err');
+}
+
+async function submitGcVerifyOtp() {
+  const code = document.getElementById('gcOtpCode').value.trim();
+  if (!code || code.length !== 6) return toast('أدخل رمز التحقق المكوّن من 6 أرقام','err');
+
+  setGcBtnLoading(true);
+  const res = await callApi({ action:'verifyProjectCodeOtp', universityId: currentUser.universityId, code });
+  setGcBtnLoading(false);
+
+  if (res.status !== 'success') return toast(res.message || 'حدث خطأ','err');
+
+  document.getElementById('gcResultProjectName').textContent = res.projectName || '';
+  document.getElementById('gcResultCode').textContent = res.projectUid || '';
+  setGcStep('gcResultStep');
+  renderGetCodeFoot();
+}
+
+function copyProjectCode() {
+  const code = document.getElementById('gcResultCode').textContent.trim();
+  if (!code) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(() => toast('تم نسخ الرمز','ok')).catch(() => toast('تعذّر نسخ الرمز،انسخه يدوياً','err'));
+  } else {
+    toast('انسخ الرمز يدوياً: ' + code,'ok');
+  }
+}
+
+/* ══════════════════════════════════════════
+   CARD OPTIONS MENU (⋯) + REPORT PROJECT
+══════════════════════════════════════════ */
+function toggleCardMenu(event, uid) {
+  event.stopPropagation();
+  const menu = document.getElementById('menu-' + uid);
+  const isOpen = menu.classList.contains('open');
+  document.querySelectorAll('.card-options-menu.open').forEach(m => m.classList.remove('open'));
+  if (!isOpen) menu.classList.add('open');
+}
+
+function reportProject(event, uid, seq) {
+  event.stopPropagation();
+  document.querySelectorAll('.card-options-menu.open').forEach(m => m.classList.remove('open'));
+
+  const studentName = currentUser ? currentUser.name : 'طالب';
+  const text = `أنا الطالب/ة ${studentName} أود الإبلاغ عن المشروع رقم ${seq} وذلك بسبب: `;
+  const url = `https://wa.me/${CFG.SUPPORT_WHATSAPP}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+/* ══════════════════════════════════════════
+   LIKE / COMMENTS / SHARE — تفاعل آني عبر Firebase Realtime Database
+   لا حاجة لتحديث الصفحة: أي إعجاب أو تعليق يصل لكل المستخدمين المتصلين
+   فوراً عبر الاستماع المباشر (on('value')) بدل التحديث الدوري (polling).
+══════════════════════════════════════════ */
+async function handleLikeClick(event, uid) {
+  event.stopPropagation();
+  if (!currentUser) { toast('سجّل دخولك للتفاعل مع المشاريع','err'); goToLogin(); return openOverlay('authOverlay'); }
+  if (likeBusy[uid]) return;
+  likeBusy[uid] = true;
+
+  const likeRef = db.ref('likes/' + uid + '/' + currentUser.universityId);
+  try {
+    const snap = await likeRef.once('value');
+    if (snap.exists()) await likeRef.remove();
+    else await likeRef.set(firebase.database.ServerValue.TIMESTAMP);
+    // لا داعي لتحديث الواجهة يدوياً هنا — مستمع likes في initRealtimeListeners()
+    // يحدّثها آنياً فور تنفيذ الكتابة محلياً (حتى قبل تأكيد الخادم)، وهذا ما
+    // يمنح الإحساس بالآنية الفورية لدى كل من المستخدم نفسه وبقية المتصفّحين.
+  } catch (e) {
+    toast('تعذّر تنفيذ العملية، تحقّق من اتصالك بالإنترنت','err');
+  }
+  likeBusy[uid] = false;
+}
+
+function updateLikeDOM(uid) {
+  const btn = document.getElementById('like-' + uid);
+  const countEl = document.getElementById('likeCount-' + uid);
+  if (!btn || !countEl) return;
+  const liked = !!myLikes[uid];
+  const count = likeCounts[uid] || 0;
+  btn.classList.toggle('liked', liked);
+  btn.querySelector('.heart-ico').textContent = liked ? '❤️' : '🤍';
+  countEl.textContent = count > 0 ? count : '';
+}
+
+function openCommentsModal(event, uid, name) {
+  event.stopPropagation();
+  activeCommentsUID = uid;
+  activeCommentsName = name;
+  document.getElementById('commentsModalSub').textContent = 'مشروع: ' + name;
+  document.getElementById('commentInput').value = '';
+  document.getElementById('commentSendBtn').disabled = true;
+  renderCommentsList(commentsForProject(uid)); // التعليقات محمَّلة مسبقاً وآنياً من Firebase
+  openOverlay('commentsOverlay');
+}
+
+function commentsForProject(uid) {
+  const node = commentsTree[uid] || {};
+  return Object.keys(node)
+    .map(id => ({ id, ...node[id] }))
+    .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+}
+
+function renderCommentsList(comments) {
+  const list = document.getElementById('commentsList');
+  if (!comments || comments.length === 0) {
+    list.innerHTML = `<div class="comments-empty">لا توجد تعليقات بعد، كن أول من يعلّق!</div>`;
+    return;
+  }
+  list.innerHTML = comments.map(c => `
+    <div class="comment-row">
+      <div class="comment-av">${initial(c.authorName||'?')}</div>
+      <div class="comment-bubble">
+        <div class="comment-author">${esc(c.authorName||'طالب')}</div>
+        <div class="comment-text">${esc(c.text)}</div>
+        <div class="comment-time">${formatCommentTime(c.timestamp)}</div>
+      </div>
+    </div>
+  `).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+function formatCommentTime(ts) {
+  try {
+    const d = new Date(ts);
+    if (isNaN(d)) return '';
+    return d.toLocaleString('ar-SY', { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
+  } catch { return ''; }
+}
+
+async function sendComment() {
+  if (!currentUser) { toast('سجّل دخولك لإضافة تعليق','err'); closeOverlayDirect('commentsOverlay'); goToLogin(); return openOverlay('authOverlay'); }
+  const input = document.getElementById('commentInput');
+  const text = input.value.trim();
+  if (!text) return;
+  if (text.length > 500) { toast('التعليق طويل جداً (الحد الأقصى 500 حرف)','err'); return; }
+
+  const btn = document.getElementById('commentSendBtn');
+  btn.disabled = true;
+
+  try {
+    const newRef = db.ref('comments/' + activeCommentsUID).push();
+    await newRef.set({
+      universityId: currentUser.universityId,
+      authorName:   currentUser.name || currentUser.universityId,
+      text:         text,
+      timestamp:    firebase.database.ServerValue.TIMESTAMP,
+    });
+    input.value = '';
+    // ستُحدَّث القائمة والعداد آنياً عبر مستمع comments في initRealtimeListeners()
+    // فور وصول القيمة محلياً، فلا حاجة لإدراجها يدوياً هنا.
+  } catch (e) {
+    toast('تعذّر إرسال التعليق، تحقّق من اتصالك بالإنترنت','err');
+  }
+  btn.disabled = !input.value.trim();
+}
+
+function shareProject(event, uid) {
+  event.stopPropagation();
+  const p = allProjects.find(x => x.uid === uid);
+  if (!p) return;
+
+  const text = `مشروع: ${p.name}\n${p.desc ? p.desc + '\n' : ''}الطلاب: ${p.members.join('، ')}\n\nشاهد المشروع على منصة مشاريع الطلاب`;
+
+  if (navigator.share) {
+    navigator.share({ title: p.name, text }).catch(() => {});
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  }
+}
+
+/* ══════════════════════════════════════════
+   FIREBASE REALTIME LISTENERS (تفاعل آني حقيقي — بدون أي تحديث للصفحة)
+   نستمع مباشرةً لعقدتي likes و comments الكاملتين في قاعدة بيانات Firebase
+   Realtime Database. أي تغيير من أي مستخدم متصل، من أي مكان، ينعكس فوراً
+   على واجهة الجميع عبر on('value') دون الحاجة لإعادة تحميل الصفحة أو أي
+   استطلاع دوري (polling).
+
+   ملاحظة إعداد مهمة: يجب ضبط قواعد الأمان (Rules) في Firebase Realtime
+   Database للسماح بالقراءة والكتابة على عقدتي "likes" و"comments"
+   (راجع لوحة تحكم Firebase ← Realtime Database ← Rules).
+══════════════════════════════════════════ */
+function initRealtimeListeners() {
+  db.ref('likes').on('value', snapshot => {
+    likesTree = snapshot.val() || {};
+    recomputeLikesFromTree();
+  }, err => console.warn('Firebase likes listener error:', err));
+
+  db.ref('comments').on('value', snapshot => {
+    commentsTree = snapshot.val() || {};
+    recomputeCommentCountsFromTree();
+    // إن كانت نافذة التعليقات مفتوحة على مشروع معيّن، حدّث القائمة المعروضة آنياً أيضاً
+    if (activeCommentsUID && document.getElementById('commentsOverlay').classList.contains('open')) {
+      renderCommentsList(commentsForProject(activeCommentsUID));
+    }
+  }, err => console.warn('Firebase comments listener error:', err));
+}
+
+function recomputeLikesFromTree() {
+  likeCounts = {};
+  myLikes    = {};
+  Object.keys(likesTree).forEach(uid => {
+    const likers = likesTree[uid] || {};
+    likeCounts[uid] = Object.keys(likers).length;
+    if (currentUser && likers[currentUser.universityId]) myLikes[uid] = true;
+  });
+  allProjects.forEach(p => updateLikeDOM(p.uid));
+}
+
+function recomputeCommentCountsFromTree() {
+  commentCounts = {};
+  Object.keys(commentsTree).forEach(uid => {
+    commentCounts[uid] = Object.keys(commentsTree[uid] || {}).length;
+  });
+  document.querySelectorAll('[id^="commentCount-"]').forEach(el => {
+    const uid = el.id.replace('commentCount-', '');
+    const count = commentCounts[uid] || 0;
+    el.textContent = count > 0 ? count : '';
+  });
+}
+
 </script>
 </body>
 </html>
