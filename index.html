@@ -652,7 +652,7 @@
     </div>
     <div class="filter-pills">
       <button class="pill active"      data-f="all"       onclick="setFilter('all',this)">الكل</button>
-      <button class="pill"             data-f="pending"   onclick="setFilter('pending',this)">⏳ قيد التنفيذ</button>
+      <button class="pill"             data-f="pending"   onclick="setFilter('pending',this)">❌ لم يكتمل</button>
       <button class="pill"             data-f="completed" onclick="setFilter('completed',this)">✅ مكتملة</button>
     </div>
     <select class="sort-select" id="sortSelect" onchange="applyFilters()">
@@ -1462,7 +1462,7 @@ function cardHTML(p) {
   const moreChip = extra > 0 ? `<div class="member-chip" style="color:var(--text-muted)">+${extra}</div>` : '';
   const badge    = p.status === 'completed'
     ? `<span class="status-badge completed">✅ مكتمل</span>`
-    : `<span class="status-badge pending">⏳ قيد التنفيذ</span>`;
+    : `<span class="status-badge pending">❌ لم يكتمل</span>`;
 
   const likeCount = likeCounts[p.uid] || 0;
   const isLiked   = !!myLikes[p.uid];
@@ -1519,7 +1519,7 @@ function openDetail(uid) {
 
   const badge = document.getElementById('dBadge');
   badge.className = 'status-badge ' + p.status;
-  badge.textContent = p.status === 'completed' ? '✅ مكتمل' : '⏳ قيد التنفيذ';
+  badge.textContent = p.status === 'completed' ? '✅ مكتمل' : '❌ لم يكتمل';
 
   const descEl = document.getElementById('dDesc');
   if (p.desc) { descEl.textContent = p.desc; descEl.style.display = 'block'; }
@@ -1544,7 +1544,7 @@ function openDetail(uid) {
       vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>رابط الفيديو: <a href="${esc(p.videoURL)}" target="_blank" style="color:var(--teal)">${esc(p.videoURL)}</a></p></div>`;
     }
   } else if (p.status === 'pending') {
-    vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>لم يُرفع فيديو بعد — المشروع قيد التنفيذ.</p></div>`;
+    vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>لم يُرفع الفيديو  — المشروع لم يكتمل.</p></div>`;
   } else {
     vArea.innerHTML = `<div class="video-placeholder"><div class="vp-icon">🎬</div><p>المشروع مكتمل لكن لا يوجد فيديو مرتبط.</p></div>`;
   }
@@ -1552,12 +1552,6 @@ function openDetail(uid) {
   // footer buttons
   const foot = document.getElementById('dFoot');
   let footHTML = `<button class="btn-secondary" onclick="closeOverlayDirect('detailOverlay')">إغلاق</button>`;
-  // زر رفع الفيديو — يظهر دائماً ليتمكن صاحب المشروع من رفعه
-  if (p.status === 'pending' || !p.videoURL) {
-    footHTML += `<button class="upload-video-btn" style="flex:1" onclick="openUploadModal('${esc(p.uid)}','${esc(p.name)}')">📤 رفع الفيديو</button>`;
-  }
-  // زر تعديل/حذف المشروع — يظهر دائماً لصاحب المشروع
-  footHTML += `<button class="edit-project-btn" style="flex:1" onclick="openEditModal('${esc(p.uid)}','${esc(p.name)}')">✏️ تعديل / حذف</button>`;
   foot.innerHTML = footHTML;
 
   openOverlay('detailOverlay');
@@ -1833,16 +1827,7 @@ function buildMemberSlots() {
 }
 
 function openAddModal() {
-  ['projName','projDesc'].forEach(id => {
-    document.getElementById(id).value = '';
-    document.getElementById(id).classList.remove('err');
-  });
-  for (let i=1;i<=CFG.MAX_MEMBERS;i++) {
-    const el = document.getElementById('mem'+i);
-    if (el) { el.value=''; el.classList.remove('err'); }
-  }
-  openOverlay('addOverlay');
-  setTimeout(() => document.getElementById('projName').focus(), 280);
+  toast('لقد فاتك المشروع، حظ أوفر في الامتحان 🎓','err');
 }
 
 async function submitProject() {
@@ -2016,13 +2001,12 @@ function renderSidePanel() {
       <div class="sp-mini-title">${esc(myProject.name)}</div>
       ${myProject.desc ? `<div class="sp-mini-desc">${esc(myProject.desc)}</div>` : ''}
       <span class="status-badge ${myProject.status==='completed'?'completed':'pending'} sp-mini-badge">
-        ${myProject.status==='completed' ? '✅ مكتمل' : '⏳ قيد التنفيذ'}
+        ${myProject.status==='completed' ? '✅ مكتمل' : '❌ لم يكتمل'}
       </span>
     </div>
   ` : `
     <div class="sp-empty-mini">
-      <p>لم تُضِف مشروعاً بعد</p>
-      <button class="sp-add-mini-btn" onclick="closeSidePanel();openAddModal()">إضافة مشروع</button>
+      <p>انتهى وقت استقبال المشاريع</p>
     </div>
   `;
 
